@@ -32,7 +32,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
-from configparser import ConfigParser
+from configparser import ConfigParser  # Needed to read in from .ini files
 
 def locate_by_name(web_driver, name):
     """Clicks on something by name."""
@@ -70,46 +70,96 @@ def get_qty(web_driver, location):
 
 def get_time():
     """Returns the current time in regular time."""
-    reg_time = time.strftime("%H:%M", time.localtime())
+    reg_time = time.strftime("%H:%M", time.localtime())  # this is a str '##:##'
     if int(reg_time[:2]) > 12:  # If pm
         reg_time = str(int(reg_time[:2])-12) + reg_time[2:]  # Change to regular time
+        reg_time += " pm"
+    else:  # If am
+        reg_time += " am"
+        if reg_time[0] == "0":
+            reg_time = reg_time[1:]  # Drop the first 0 in am times
 
     return reg_time  # Returns a string
 
 def update_board(driver, remote, config):
     """Will update the time and total on the board."""
+    def update(index, message, clock, location):
+        """Where all the writing happens for one panel."""
+        for go in range(3):  # Get to the top of the text box
+            message.send_keys(Keys.ARROW_UP)
+        message.send_keys(Keys.ARROW_DOWN)
+        message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
+        for go in range(8):  # Clear everything on this line
+            message.send_keys(Keys.BACKSPACE)  # 8 times because longest case could be "12:00 pm"
+        message.send_keys(clock)
+
+        for go in range(3):  # Go one line beyond the last line
+            message.send_keys(Keys.ARROW_DOWN)
+        all_lines = message.text.split()
+        if len(all_lines) == 6:  # Check for quota
+            for go in range(5):  # Go to just after the current total if the quota is one digit
+                message.send_keys(Keys.ARROW_LEFT)
+            if len(all_lines[5]) == 2: # If the quota is two digits
+                message.send_keys(Keys.ARROW_LEFT)  # Go left one more time
+        else:
+            message.send_keys(Keys.ARROW_LEFT)  # Go left once to reach end of total
+        if len(all_lines[3]) == 2:  # If the current total has two digits
+            message.send_keys(Keys.BACKSPACE)  # Backspace one more time
+        message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
+        message.send_keys(get_qty(remote, location))
+
+    def change_color(index, colour):
+        color = "ColorP" + str(index)
+        locate_by_name(driver, color)
+        select_drop(driver, "ColorA000", colour)
+        select_drop(driver, "ColorA001", colour)
+        select_drop(driver, "ColorA002", colour)
+        locate_by_name(driver, "Ok")
+
+    locations = []  # Store the locations for many uses later
+    previous_values = []  # Store the previous qty's
+    workcenter = config.sections()[0]  # Workcenter section
+    boards = len(config.items(workcenter))  # Amount of boards
+    for line in config.items(workcenter):  # Get the corresponding value in the file
+        locations.append(line[1])
+        previous_values.append(get_qty(remote, line[1]))
+    inactives = [0] * boards  # Keep track of minutes passed for each message
+    red_markers = [False] * boards
     exit_condition = False
     while not exit_condition:  # This goes until someone closes command prompt
-        time.sleep(1)  # This prevents the while loop from executing about 
+        time.sleep(1)  # This prevents the while loop from executing about a billion times a minute 
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
-            if get_time() == "4:30":  # Stop updating at the end of the day
+            clock = get_time()
+            if clock == "4:30 pm":  # Stop updating at the end of the day
                 exit_condition = True
                 break
+
             locate_by_name(driver, "B004")  # Click menu button from main
             locate_by_id(driver, "MS000C1")  # Click 'quick message'
             locate_by_id(driver, "MS001C1")  # Click 'modify msg'
             messages = driver.find_elements(By.NAME, "MessageEditorText")
-            for index, message in enumerate(messages):
-                for go in range(3):  # Get to the top of the text box
-                   message.send_keys(Keys.ARROW_UP)
-                message.send_keys(Keys.ARROW_DOWN)
-                message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
-                for go in range(5):  # Clear everything on this line
-                    message.send_keys(Keys.BACKSPACE)
-                message.send_keys(get_time())
+            for index, message in enumerate(messages):  # For each line
+                inactives[index] += 1  # Increase the minutes passed
+                update(index, message, clock, locations[index])
 
-                for go in range(3):  # Go one line beyond the last line
-                    message.send_keys(Keys.ARROW_DOWN)
-                for go in range(6):  # Go to just after the current total
-                    message.send_keys(Keys.ARROW_LEFT)
-                all_lines = message.text.split()
-                if len(all_lines[2]) == 2:  # If the current total has two digits
-                    message.send_keys(Keys.BACKSPACE)  # Backspace one more time
-                message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
-                section = config.sections()[0]  # Workcenter section
-                location = config.items(section)[index][1]  # Get the corresponding value in the file
-                message.send_keys(get_qty(remote, location))
+            for index in range(boards):
+                num_drop = get_qty(remote, locations[index])
+                if num_drop == previous_values[index]:
+                    inactivity = config.sections()[2]  # Inactivity section
+                    time_limit = config.items(inactivity)
+                    if (inactives[index] >= int(time_limit[index][1])) and (red_markers[index] == False):
+                    # If the time passed without a new drop equals or exceeds the line's time limit
+                    # and the color isn't already red
+                        change_color(index, "Red")
+                        red_markers[index] = True
+                else:  # If qty has changed
+                    if red_markers[index] == True:  # and the text is red
+                        change_color(index, "Green")  # Revert back
+                        red_markers[index] = False
+                    inactives[index] = 0  # Reset counter
+                    previous_values[index] = num_drop
+
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
             locate_by_name(driver, "Main")
@@ -118,8 +168,8 @@ def setup_message(driver, remote, config):
     """Use 'create new msg' to print the initial message."""
     def set_style(page):
         """Set the starting style."""
-        align = "AlignP" + page
-        color = "ColorP" + page
+        align = "AlignP" + str(page)
+        color = "ColorP" + str(page)
         locate_by_name(driver, align)
         select_drop(driver, "AlignA000", "Center")
         select_drop(driver, "AlignA001", "Center")
@@ -154,13 +204,15 @@ def setup_message(driver, remote, config):
                 messages[index].send_keys(Keys.SPACE)
                 messages[index].send_keys(quota)
 
+        return len(messages)
+
     locate_by_name(driver, "B004")
     for do_twice in range(2):
         locate_by_id(driver, "MS000C1")
 
-    write_message()
-    set_style("0")
-    set_style("1")
+    panels = write_message()
+    for panel_num in range(panels):
+        set_style(panel_num)
 
     locate_by_name(driver, "Save")
     locate_by_id(driver, "MS000C1")
@@ -170,7 +222,7 @@ def setup_plex(remote):
     """Get plex ready for use."""
     remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
     remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
-    remote.find_element_by_name("txtPassword").send_keys("Uline12UK")
+    remote.find_element_by_name("txtPassword").send_keys("ThisExpires7")
     remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
     locate_by_id(remote, "btnLogin")
     remote.switch_to.window(remote.window_handles[1])
@@ -191,7 +243,7 @@ def setup_board(driver):
         WebDriverWait(driver, 10).until(
             EC.frame_to_be_available_and_switch_to_it(frames[1]))
         # Going to frame enables access to the rest of the html
-    except:  # When the program restarts itself, it doesn't need to do the above again
+    except:  # If the program restarts itself, it doesn't need to do the above again
         pass
     try:  # If a Main button exists, click it to go back to the main menu
         locate_by_name(driver, "Main")
@@ -222,8 +274,9 @@ PATH = "C:\Program Files (x86)\chromedriver.exe"
 restart = True
 while restart:  # The program will restart itself if an error occurs
     try:
-        remote = webdriver.Chrome(PATH)  # Find chromedriver.exe and make a driver with Google Chrome
-        driver = webdriver.Chrome(PATH)  # Make a second driver
+        remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
+        # That way, the webdriver for the message board will be the active window
+        driver = webdriver.Chrome(PATH)
         main(driver, remote)
         restart = False
     except:
@@ -233,6 +286,5 @@ while restart:  # The program will restart itself if an error occurs
 
 # Additional Implementations:
 # Change the font to red for a line if their total hasn't increased within the inactivity time frame
-# Remove the extra 0 from am times
-# Make the times include am and pm
-# Make the program stop at 4:30 pm
+#     Needs testing
+# Include error handling for finding chromedriver.exe
