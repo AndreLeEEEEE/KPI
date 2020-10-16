@@ -56,6 +56,24 @@ def get_time():
 
     return reg_time  # Returns a string
 
+def change_color(driver, index, colour):
+    """Changes the text color for one message."""
+    color = "ColorP" + str(index)
+    locate_by_name(driver, color)
+    select_drop(driver, "ColorA000", colour)
+    select_drop(driver, "ColorA001", colour)
+    select_drop(driver, "ColorA002", colour)
+    locate_by_name(driver, "Ok")
+
+def change_align(driver, index):
+    """Changes the text alignment for one message."""
+    align = "AlignP" + str(index)
+    locate_by_name(driver, align)
+    select_drop(driver, "AlignA000", "Center")
+    select_drop(driver, "AlignA001", "Center")
+    select_drop(driver, "AlignA002", "Center")
+    locate_by_name(driver, "Ok")
+
 def update_board(driver, remote, config):
     """Will update the time and total on the board."""
     def update(message, clock, location):
@@ -83,23 +101,13 @@ def update_board(driver, remote, config):
         message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
         message.send_keys(get_qty(remote, location))
 
-    def change_color(index, colour):
-        color = "ColorP" + str(index)
-        locate_by_name(driver, color)
-        select_drop(driver, "ColorA000", colour)
-        select_drop(driver, "ColorA001", colour)
-        select_drop(driver, "ColorA002", colour)
-        locate_by_name(driver, "Ok")
-
     locations = []  # Store the locations for many uses later
     previous_values = []  # Store the previous qty's
     workcenter = config.sections()[0]  # Workcenter section
-    boards = len(config.items(workcenter))  # Amount of boards
     for line in config.items(workcenter):  # Get the corresponding value in the file
         locations.append(line[1])
         previous_values.append(get_qty(remote, line[1]))
-    inactives = [0] * boards  # Keep track of minutes passed for each message
-    red_markers = [False] * boards  # Keep track of if the font is red for each board
+    red_markers = [False] * line_num  # Keep track of if the font is red for each board
     exit_condition = False
     while not exit_condition:  # This goes until someone closes command prompt
         time.sleep(1)  # This prevents the while loop from executing about a billion times a minute 
@@ -118,7 +126,7 @@ def update_board(driver, remote, config):
                 inactives[index] += 1  # Increase the minutes passed for the current line
                 update(message, clock, locations[index])  # Where time and qty get changed
 
-            for index in range(boards):  
+            for index in range(line_num):  
                 # Go through the boards again to check their inactivity time,
                 # because apparently trying to perform the standard update 
                 # alongside the inactivity checking causes an error
@@ -127,16 +135,16 @@ def update_board(driver, remote, config):
                     #  If the current qty equals the previous qty
                     inactivity = config.sections()[2]  # Inactivity section
                     time_limit = config.items(inactivity)[index][1]  # In minutes
-                    if time_limit == "x":
-                        continue
+                    if time_limit == "x":  # There is not time limit
+                        continue  # Exit this iteration
                     if (inactives[index] >= int(time_limit)) and (red_markers[index] == False):
                     # If the time passed without a new drop equals or exceeds the line's time limit
                     # and the font is red
-                        change_color(index, "Red")
+                        change_color(driver, index, "Red")
                         red_markers[index] = True
                 else:
                     if red_markers[index] == True:  # if the text is red
-                        change_color(index, "Green")  # Revert back
+                        change_color(driver, index, "Green")  # Revert back
                         red_markers[index] = False
                     inactives[index] = 0  # Reset counter
                     previous_values[index] = num_drop  # Update previous value
@@ -147,25 +155,9 @@ def update_board(driver, remote, config):
 
 def setup_message(driver, remote, config):
     """Use 'create new msg' to print the initial message."""
-    def set_style(page):
-        """Set the starting style."""
-        align = "AlignP" + str(page)
-        color = "ColorP" + str(page)
-        locate_by_name(driver, align)
-        select_drop(driver, "AlignA000", "Center")
-        select_drop(driver, "AlignA001", "Center")
-        select_drop(driver, "AlignA002", "Center")
-        locate_by_name(driver, "Ok")
-        locate_by_name(driver, color)
-        select_drop(driver, "ColorA000", "Green")
-        select_drop(driver, "ColorA001", "Green")
-        select_drop(driver, "ColorA002", "Green")
-        locate_by_name(driver, "Ok")
-
     def write_message():
         """Put the correct information in the text boxes."""
-        locations = config.sections()[0]  # Find out how many lines there are
-        for j in range(len(config.items(locations))-1):
+        for j in range(line_num-1):
             locate_by_name(driver, "AddPage")
         messages = driver.find_elements(By.NAME, "MessageEditorText")
         for index, message in enumerate(messages):
@@ -187,15 +179,15 @@ def setup_message(driver, remote, config):
                 message.send_keys(Keys.SPACE)
                 message.send_keys(quota)
 
-        return len(messages)
-
+    # Navigate to create new message
     locate_by_name(driver, "B004")
     for do_twice in range(2):
         locate_by_id(driver, "MS000C1")
 
-    panels = write_message()
-    for panel_num in range(panels):
-        set_style(panel_num)
+    write_message()
+    for panel_num in range(line_num):
+        change_color(driver, panel_num, "Green")
+        change_align(driver, panel_num)
 
     locate_by_name(driver, "Save")
     locate_by_id(driver, "MS000C1")
@@ -241,7 +233,7 @@ def main(driver, remote, config):
     setup_message(driver, remote, config)
     time.sleep(5)
     update_board(driver, remote, config)
-
+    # The below executes at the end
     finished = False
     while not finished:
         try:
@@ -252,10 +244,12 @@ def main(driver, remote, config):
             locate_by_name(driver, "B000")  # Try to clear the board
 
 PATH = "chromedriver.exe"  # Put chromedriver.exe into the same directory
-
 config = ConfigParser()
 if config.read('KPIt.ini'):
     print("KPIt.ini file successfully read in")
+    lines = config.sections()[0]
+    line_num = len(config.items(lines))
+    inactives = [0] * line_num  # Keep track of minutes passed for each message
 else:
     print("Couldn't read in KPIt.ini, make sure it's in the same directory")
     exit()
