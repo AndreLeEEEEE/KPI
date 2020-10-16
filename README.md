@@ -6,7 +6,7 @@ python 3.7.8
 PyAutoGUI 0.9.52
 selenium 3.141.0
 ChromeDriver 80.0.3987.106
-Visual Studio 16.7.5
+Visual Studio 16.7.6
 
 Requirements:
 Plex login for Wanco
