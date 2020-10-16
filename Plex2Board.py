@@ -1,30 +1,6 @@
-#IMPORTANT
-"""If command prompt raises an error and that error says timeout:
-Before you close the program, make sure the message board window (mbw)
-is on the main menu. Then try starting the program again.
-Most of the timeout errors occur because any action taken
-on the mbw start from the main menu. So
-the program will try to look for a button only found
-on the main menu even if the window is on another page.
-With this in mind, even if the program is working as
-intended, it'll close itself when 4:30 pm hits.
-Closing the program earlier than that will require
-the user to navigate the mbw back
-to the main menu before closing."""
-"""When running the program, let the computer and mouse
-alone until the mbw successfully logs in.
-After this, the computer can be used for other purposes.
-However, don't disrupt the new message board or plex 
-windows (pw). Random clicking on the mbw can lead
-to the timeout error above. Random clicking on the
-pw can lead to the clickinterrupted error.
-Last, minimizing or shrinking the new windows 
-will likely lead to the 'cannot operate' error.
-Basically, if a human can't click it then
-the program can't either."""
-
 import pyautogui as auto
 import time
+import os
 import re
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys  # Allows access to non character keys
@@ -83,7 +59,7 @@ def get_time():
 
 def update_board(driver, remote, config):
     """Will update the time and total on the board."""
-    def update(index, message, clock, location):
+    def update(message, clock, location):
         """Where all the writing happens for one panel."""
         for go in range(3):  # Get to the top of the text box
             message.send_keys(Keys.ARROW_UP)
@@ -124,7 +100,7 @@ def update_board(driver, remote, config):
         locations.append(line[1])
         previous_values.append(get_qty(remote, line[1]))
     inactives = [0] * boards  # Keep track of minutes passed for each message
-    red_markers = [False] * boards
+    red_markers = [False] * boards  # Keep track of if the font is red for each board
     exit_condition = False
     while not exit_condition:  # This goes until someone closes command prompt
         time.sleep(1)  # This prevents the while loop from executing about a billion times a minute 
@@ -140,25 +116,31 @@ def update_board(driver, remote, config):
             locate_by_id(driver, "MS001C1")  # Click 'modify msg'
             messages = driver.find_elements(By.NAME, "MessageEditorText")
             for index, message in enumerate(messages):  # For each line
-                inactives[index] += 1  # Increase the minutes passed
-                update(index, message, clock, locations[index])
+                inactives[index] += 1  # Increase the minutes passed for the current line
+                update(message, clock, locations[index])  # Where time and qty get changed
 
-            for index in range(boards):
+            for index in range(boards):  
+                # Go through the boards again to check their inactivity time,
+                # because apparently trying to perform the standard update 
+                # alongside the inactivity checking causes an error
                 num_drop = get_qty(remote, locations[index])
                 if num_drop == previous_values[index]:
+                    #  If the current qty equals the previous qty
                     inactivity = config.sections()[2]  # Inactivity section
-                    time_limit = config.items(inactivity)
-                    if (inactives[index] >= int(time_limit[index][1])) and (red_markers[index] == False):
+                    time_limit = config.items(inactivity)[index][1]  # In minutes
+                    if time_limit == "x":
+                        continue
+                    if (inactives[index] >= int(time_limit)) and (red_markers[index] == False):
                     # If the time passed without a new drop equals or exceeds the line's time limit
-                    # and the color isn't already red
+                    # and the font is red
                         change_color(index, "Red")
                         red_markers[index] = True
-                else:  # If qty has changed
-                    if red_markers[index] == True:  # and the text is red
+                else:
+                    if red_markers[index] == True:  # if the text is red
                         change_color(index, "Green")  # Revert back
                         red_markers[index] = False
                     inactives[index] = 0  # Reset counter
-                    previous_values[index] = num_drop
+                    previous_values[index] = num_drop  # Update previous value
 
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
@@ -183,26 +165,28 @@ def setup_message(driver, remote, config):
 
     def write_message():
         """Put the correct information in the text boxes."""
-        locate_by_name(driver, "AddPage")
+        locations = config.sections()[0]  # Find out how many lines there are
+        for j in range(len(config.items(locations))-1):
+            locate_by_name(driver, "AddPage")
         messages = driver.find_elements(By.NAME, "MessageEditorText")
-        for index in range(len(messages)):
+        for index, message in enumerate(messages):
             section = config.sections()[0]  # Workcenter section
             location = config.items(section)[index][1]  # Get the corresponding value in the file
             total = get_qty(remote, location)
 
-            messages[index].send_keys(get_time())
-            messages[index].send_keys(Keys.RETURN)
-            messages[index].send_keys(location)
-            messages[index].send_keys(Keys.RETURN)
-            messages[index].send_keys(total)  # Fill in with value from Plex
+            message.send_keys(get_time())
+            message.send_keys(Keys.RETURN)
+            message.send_keys(location)
+            message.send_keys(Keys.RETURN)
+            message.send_keys(total)  # Fill in with value from Plex
 
             section = config.sections()[1]  # Goal section
             quota = config.items(section)[index][1]
             if int(quota) != 0:  # If there's a quota for the day
-                messages[index].send_keys(Keys.SPACE)
-                messages[index].send_keys("/")
-                messages[index].send_keys(Keys.SPACE)
-                messages[index].send_keys(quota)
+                message.send_keys(Keys.SPACE)
+                message.send_keys("/")
+                message.send_keys(Keys.SPACE)
+                message.send_keys(quota)
 
         return len(messages)
 
@@ -250,9 +234,7 @@ def setup_board(driver):
     except:  # If not, the page is already on the main menu and ready to begin
         pass
 
-def main(driver, remote):
-    config = ConfigParser()
-    config.read('KPIt.ini')
+def main(driver, remote, config):
     setup_board(driver)
     setup_plex(remote)
 
@@ -270,21 +252,24 @@ def main(driver, remote):
         except:
             locate_by_name(driver, "B000")  # Try to clear the board
 
-PATH = "C:\Program Files (x86)\chromedriver.exe"
+PATH = "chromedriver.exe"  # Put chromedriver.exe into the same directory
+
+config = ConfigParser()
+if config.read('KPIt.ini'):
+    print("KPIt.ini file successfully read in")
+else:
+    print("Couldn't read in KPIt.ini, make sure it's in the same directory")
+    exit()
+
 restart = True
 while restart:  # The program will restart itself if an error occurs
     try:
         remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
         # That way, the webdriver for the message board will be the active window
         driver = webdriver.Chrome(PATH)
-        main(driver, remote)
+        main(driver, remote, config)
         restart = False
     except:
         print("Restarting program")
         remote.quit()
         driver.quit()
-
-# Additional Implementations:
-# Change the font to red for a line if their total hasn't increased within the inactivity time frame
-#     Needs testing
-# Include error handling for finding chromedriver.exe
