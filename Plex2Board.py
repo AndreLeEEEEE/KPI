@@ -1,6 +1,5 @@
 import pyautogui as auto
 import time
-import os
 import re
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys  # Allows access to non character keys
