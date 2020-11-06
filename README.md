@@ -3,16 +3,16 @@ This python script automatically updates a message board with values from Plex u
 KPI stands for Key Performance Indicator.
 
 Versions of python and installed modules:
-python 3.7.8
-PyAutoGUI 0.9.52
-selenium 3.141.0
-ChromeDriver 80.0.3987.106
-Visual Studio 16.7.6
+- python 3.7.8
+- PyAutoGUI 0.9.52
+- selenium 3.141.0
+- ChromeDriver 80.0.3987.106
+- Visual Studio 16.7.6
 
 Requirements:
-Plex login for Wanco
-The correct .ini file (example found in this repository)
-Ethernet connection to an active message board
+- Plex login for Wanco
+- The correct .ini file (example found in this repository)
+- Ethernet cable connection to an active message board
 
 Abbreviations:
 Message Board window = MBw
