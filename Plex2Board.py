@@ -114,7 +114,7 @@ def update_board(driver, remote, config):
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
-            if clock == "4:30 pm":  # Stop updating at the end of the day
+            if clock == "10:58 am":  # Stop updating at the end of the day
                 exit_condition = True
                 break
 
@@ -264,5 +264,6 @@ while restart:  # The program will restart itself if an error occurs
         restart = False
     except:
         print("Restarting program")
-        remote.quit()
-        driver.quit()
+    finally:
+        remote.quit()  # It's very important that quit is called on both drivers
+        driver.quit()  # This will ensure the error producing webdriver sessions no longer occupy memory
