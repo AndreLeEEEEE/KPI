@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.action_chains import ActionChains
 from configparser import ConfigParser  # Needed to read in from .ini files
 
 def locate_by_name(web_driver, name):
@@ -114,7 +115,7 @@ def update_board(driver, remote, config):
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
-            if clock == "10:58 am":  # Stop updating at the end of the day
+            if clock == "4:30 pm":  # Stop updating at the end of the day
                 exit_condition = True
                 break
 
@@ -201,10 +202,17 @@ def setup_plex(remote):
     remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
     locate_by_id(remote, "btnLogin")
     remote.switch_to.window(remote.window_handles[1])
-    locate_by_id(remote, "tableMenuNode1")
-    locate_by_id(remote, "tableMenuNode4")
-    locate_by_id(remote, "tableMenuNode0")
-    locate_by_id(remote, "tableMenuNode11")
+    action = ActionChains(remote)
+    action.key_down(Keys.CONTROL).send_keys('M').key_up(Keys.CONTROL).perform()
+    action = 404
+    time.sleep(1)
+    action = ActionChains(remote)
+    action.send_keys("Production History").send_keys(Keys.RETURN).perform()
+    action = 404
+    time.sleep(1)
+    action = ActionChains(remote)
+    action.send_keys(Keys.DOWN).send_keys(Keys.RETURN).perform()
+    time.sleep(1)
 
 def setup_board(driver):
     """Get the board ready for use."""
