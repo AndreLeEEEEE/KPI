@@ -23,7 +23,9 @@ There are three phases to this script: Setup, Update, Restart.
 Setup will happen first, and then Update will happen.
 Restart is only entered if an unhandled error occurs in the Setup or Update phase. After the Restart phase, the Setup and Update phase will occur as normal.
 
-Setup:
+Update 11/23/2020: I'm waiting on test Plex credentials so I can take my own out.
+
+Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
 configparser is used to read the contents of an .ini file, which is in the same directory as the script, into a variable: config.
@@ -36,7 +38,7 @@ to open a chrome window to operate Plex. The script will navigate to the Product
 create a new message on the MBw that consist of the current time, line name, and how many trailers they have dropped (out of a quota
 if applicable). There will be one "face" for each line specified in the .ini file. 
 
-Update:
+Update Phase
 In this phase, the program will stay in the function, update_board(), until completion. The board message and its faces will update
 every minute due to the time display. Every minute, not only will the program update the current time, it'll also look at each line's
 Production History information to check if the amount of trailers dropped increased. In addition, the program keeps track of the amount
@@ -47,7 +49,7 @@ possible for one line's text to be green and another line's text to be red becau
 program will stop when the current time equals the overtime closing time: 4:30 pm. At this point, the program will clear the board,
 bring MBw back to the main menu, and quit both drivers.
 
-Restart:
+Restart Phase
 This phase only occurs if an error prohibits the script's progress. Every function in the program is called, one way or another, through
 main(). This means that any error that occurs will result in the brief exit out of main(). Thus, the call to main() is placed inside
 a try block. Should an error (that's uncovered by other try/except blocks inside other functions) happen, main's try block skips
