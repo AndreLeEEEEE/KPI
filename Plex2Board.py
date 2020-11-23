@@ -115,7 +115,7 @@ def update_board(driver, remote, config):
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
-            if clock == "4:30 pm":  # Stop updating at the end of the day
+            if clock == "11:26 am":  # Stop updating at the end of the day
                 exit_condition = True
                 break
 
@@ -196,12 +196,26 @@ def setup_message(driver, remote, config):
 
 def setup_plex(remote):
     """Get plex ready for use."""
-    remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
-    remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
-    remote.find_element_by_name("txtPassword").send_keys("ThisExpires7")
-    remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
-    locate_by_id(remote, "btnLogin")
+    remote.get("https://accounts.plex.com/interaction/fea73869-0eda-4f67-b381-c167be521da6#ilp=woW7Rk4HS5ijknMk0L8Jjl8&ie=1606149525001")
+    parent = "//form[@class='form-horizontal']//div[@class='plex-idp-wrapper']"  # Allows access to input fields, which are hidden
+    # Enter in company code
+    form = remote.find_element_by_xpath(parent + "//div[@id='companyCodeInput']//div[@class='col-sm-12']//input[@id='inputCompanyCode3']")
+    form.send_keys("wanco")
+    action = ActionChains(remote)
+    action.send_keys(Keys.RETURN).perform()
+    time.sleep(.5)
+    # Enter in username
+    form = remote.find_element_by_xpath(parent + "//div[@id='usernameInput']//div[@class='col-sm-12']//input[@id='inputUsername3']")
+    form.send_keys("w.mc.tester")
+    action.perform()
+    time.sleep(.5)
+    # Enter in password
+    form = remote.find_element_by_xpath(parent + "//div[@id='passwordInput']//div[@class='col-sm-12']//input[@id='inputPassword3']")
+    form.send_keys("test1wanco")
+    action.perform()
+    time.sleep(.5)
     remote.switch_to.window(remote.window_handles[1])
+    # Navigate to Production History
     action = ActionChains(remote)
     action.key_down(Keys.CONTROL).send_keys('M').key_up(Keys.CONTROL).perform()
     action = 404
