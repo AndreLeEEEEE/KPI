@@ -1,0 +1,25 @@
+Warnings for using Selenium.
+1. I believe the use of the close() function on webdrivers is essential because webdrivers
+allocate space from memory. I've tried reading about this online, and the general consensus 
+is that webdrivers that go unclosed will still use up memory. However, since they're confined
+to the script, I'm not sure if webdrivers consume some of the memory that is allocated for
+entire program or if they consume some of the memory that the entire computer possesses.
+Regardless, use close(). The slight issue with this is that all automated programs only 
+call close() if an error occurs or if they finish their task. Early closing of the program,
+which is done through clicking the red x button, might be producing consequences unbeknownst
+to me.
+2. Occasionally, starting a webdriver will print multiple lines (or a steady endless amount of lines)
+saying that the "handshake failed". As far as I know, this is supposed to mean that Selenium's attempts
+to open up a browser window is failing. However, in all the cases I've seen this before, failed handshakes
+have never prevented the program from operating. This happens even if the warning is printing endlessly.
+I still don't know the true cause of these warnings since they occur sporadically. The causes could be
+closing programs without calling close() first or the computer's current internet connection.
+3. While Selenium can produce errors due to timeouts or hidden elements, those are errors in the code.
+Some errors can originate externally. Minimizing the webdriver's window will raise an error similar to
+the hidden elements one. Trying to use the webdriver's window will sabotage the program's automated
+procedures. Letting the monitor sleep for too long will make the program stop. Apparently, running other
+"intensive" tasks will stop the program, too. For example, trying the code demos on W3schools will
+halt the program's execution. This may be due to the fact that another IDE is running. Then again,
+I also tried running two programs simultaneously, one with Selenium and one without. Both were
+able to run at the same time. Thus, I truly have no idea all other computer activities could 
+cause the Selenium program to crash.
