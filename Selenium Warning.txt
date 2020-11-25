@@ -21,5 +21,5 @@ procedures. Letting the monitor sleep for too long will make the program stop. A
 "intensive" tasks will stop the program, too. For example, trying the code demos on W3schools will
 halt the program's execution. This may be due to the fact that another IDE is running. Then again,
 I also tried running two programs simultaneously, one with Selenium and one without. Both were
-able to run at the same time. By chance, I also learned that uploading a file on Github will crash
+able to run at the same time. By chance, I also learned that uploading a file on Github could crash
 the program. I truly have no idea all other computer activities could cause the Selenium program to crash.
