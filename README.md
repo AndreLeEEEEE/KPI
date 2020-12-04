@@ -24,6 +24,7 @@ Setup will happen first, and then Update will happen.
 Restart is only entered if an unhandled error occurs in the Setup or Update phase. After the Restart phase, the Setup and Update phase will occur as normal.
 
 Update 11/23/2020: I'm waiting on test Plex credentials so I can take my own out.
+Update 12/4/2020: I now have generic Plex credentials.
 
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
