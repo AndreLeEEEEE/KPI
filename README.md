@@ -27,7 +27,9 @@ Update 11/23/2020: I'm waiting on test Plex credentials so I can take my own out
 
 Update 12/4/2020: I now have generic Plex credentials.
 
-Update 12/18/2020: Back to my credentials since the generic account got nerfed in terms of what pages it can access.
+Update 12/18/2020: Back to my credentials since the generic account got nerfed in terms of what pages it can access. There are 
+plans for this program to be used soon. However, there's been issues with getting the board to work on 3x4 panels instead
+of the 3x5 I've been working with.
 
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
