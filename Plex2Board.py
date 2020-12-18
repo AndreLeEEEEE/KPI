@@ -106,7 +106,7 @@ def update_board(driver, remote, config):
     previous_values = []  # Store the previous qty's
     workcenter = config.sections()[0]  # Workcenter section
     for line in config.items(workcenter):  # Get the corresponding value in the file
-        locations.append(line[1])
+        locations.append(line[1])  # Get line name
         previous_values.append(get_qty(remote, line[1]))
     red_markers = [False] * line_num  # Keep track of if the font is red for each board
     exit_condition = False
@@ -115,7 +115,7 @@ def update_board(driver, remote, config):
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
-            if clock == "11:26 am":  # Stop updating at the end of the day
+            if clock == "4:30 pm":  # Stop updating at the end of the day
                 exit_condition = True
                 break
 
@@ -136,7 +136,7 @@ def update_board(driver, remote, config):
                     #  If the current qty equals the previous qty
                     inactivity = config.sections()[2]  # Inactivity section
                     time_limit = config.items(inactivity)[index][1]  # In minutes
-                    if time_limit == "x":  # There is not time limit
+                    if time_limit == "x":  # There is no time limit
                         continue  # Exit this iteration
                     if (inactives[index] >= int(time_limit)) and (red_markers[index] == False):
                     # If the time passed without a new drop equals or exceeds the line's time limit
@@ -158,7 +158,7 @@ def setup_message(driver, remote, config):
     """Use 'create new msg' to print the initial message."""
     def write_message():
         """Put the correct information in the text boxes."""
-        for j in range(line_num-1):
+        for j in range(line_num-1):  # Add a page for each line
             locate_by_name(driver, "AddPage")
         messages = driver.find_elements(By.NAME, "MessageEditorText")
         for index, message in enumerate(messages):
@@ -196,24 +196,11 @@ def setup_message(driver, remote, config):
 
 def setup_plex(remote):
     """Get plex ready for use."""
-    remote.get("https://accounts.plex.com/interaction/fea73869-0eda-4f67-b381-c167be521da6#ilp=woW7Rk4HS5ijknMk0L8Jjl8&ie=1606149525001")
-    parent = "//form[@class='form-horizontal']//div[@class='plex-idp-wrapper']"  # Allows access to input fields, which are hidden
-    # Enter in company code
-    form = remote.find_element_by_xpath(parent + "//div[@id='companyCodeInput']//div[@class='col-sm-12']//input[@id='inputCompanyCode3']")
-    form.send_keys("wanco")
-    action = ActionChains(remote)
-    action.send_keys(Keys.RETURN).perform()
-    time.sleep(.5)
-    # Enter in username
-    form = remote.find_element_by_xpath(parent + "//div[@id='usernameInput']//div[@class='col-sm-12']//input[@id='inputUsername3']")
-    form.send_keys("w.mc.tester")
-    action.perform()
-    time.sleep(.5)
-    # Enter in password
-    form = remote.find_element_by_xpath(parent + "//div[@id='passwordInput']//div[@class='col-sm-12']//input[@id='inputPassword3']")
-    form.send_keys("test1wanco")
-    action.perform()
-    time.sleep(.5)
+    remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
+    remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
+    remote.find_element_by_name("txtPassword").send_keys("ThisExpires7")
+    remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
+    locate_by_id(remote, "btnLogin")
     remote.switch_to.window(remote.window_handles[1])
     # Navigate to Production History
     action = ActionChains(remote)
