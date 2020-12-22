@@ -116,7 +116,7 @@ def update_board(driver, remote, config):
     red_markers = [False] * line_num  # Keep track of if the font is red for each board
     exit_condition = False
     while not exit_condition:  # This goes until someone closes command prompt or the end time is reached
-        time.sleep(1)  # This prevents the while loop from executing about a billion times a minute
+        time.sleep(1.75)  # This prevents the while loop from executing about a billion times a minute
         try:  # Check if buttons on the page 
             find_by_name(driver, "B001")
         except:
