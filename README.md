@@ -37,6 +37,14 @@ to type in the credentials. I'm assuming that failing to do so before the next u
 and the program will restart. Even though this restart would "fix" everything, all inactivity progress would be lost.
 In addition, deploying a program that will raise an error every half hour doesn't sound good.
 
+Update 12/22/2020: The constant login problem has been fixed. I can't prevent the login prompt from appearing, but
+I can make the program reenter the credentials every time. In the update function's main while loop, the program
+will try to click on the "On Sign" button in the main menu. Next, it'll try to click on the "Back" button. Should
+this process fail, the except clause will use pyautogui to log back in. I cannot use the function: alert_is_present(),
+because apparently the login alert is no ordinary alert. Whether it be for security reasons or for something else,
+whenever the alert shows up, alert_is_present() or any type of interaction with the window becomes locked. The html
+is still there, but the program is barred from accessing it until the user logs back in.
+
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
