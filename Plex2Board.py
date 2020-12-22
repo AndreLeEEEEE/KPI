@@ -16,6 +16,11 @@ def locate_by_name(web_driver, name):
             EC.presence_of_element_located((By.NAME, name))).click()
     # Returns nothing
 
+def find_by_name(web_driver, name):
+    """Finds an element by name and returns it."""
+    return WebDriverWait(web_driver, 10).until(
+            EC.presence_of_element_located((By.NAME, name)))
+
 def locate_by_id(web_driver, id):
     """Clicks on something by id."""
     WebDriverWait(web_driver, 10).until(
@@ -110,8 +115,15 @@ def update_board(driver, remote, config):
         previous_values.append(get_qty(remote, line[1]))
     red_markers = [False] * line_num  # Keep track of if the font is red for each board
     exit_condition = False
-    while not exit_condition:  # This goes until someone closes command prompt
-        time.sleep(1)  # This prevents the while loop from executing about a billion times a minute 
+    while not exit_condition:  # This goes until someone closes command prompt or the end time is reached
+        time.sleep(1)  # This prevents the while loop from executing about a billion times a minute
+        try:  # Check if buttons on the page 
+            find_by_name(driver, "B001")
+        except:
+            auto.write("admin")
+            auto.write(["tab"])
+            auto.write("administrator")
+            auto.write(["enter"])
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
