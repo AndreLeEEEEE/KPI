@@ -31,6 +31,12 @@ Update 12/18/2020: Back to my credentials since the generic account got nerfed i
 plans for this program to be used soon. However, there's been issues with getting the board to work on 3x4 panels instead
 of the 3x5 I've been working with.
 
+Update 12/22/2020: Although the program interacts with the MBw every minute, the former occassionally asks the user
+roughly every half hour to sign back in with the admin/administrator credentials. In this case, a person will have
+to type in the credentials. I'm assuming that failing to do so before the next update will prompt a timeout error
+and the program will restart. Even though this restart would "fix" everything, all inactivity progress would be lost.
+In addition, deploying a program that will raise an error every half hour doesn't sound good.
+
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
