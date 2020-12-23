@@ -161,7 +161,7 @@ def update_board(driver, remote, config):
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
             locate_by_name(driver, "Main")
-        elif current_second == "30":
+        elif current_second == "30":  # Every half minute, redo the login so the window doesn't register "inactivity"
             time.sleep(1)
             auto.click(auto.locateOnScreen('Log_Out.png'))
             time.sleep(1)
