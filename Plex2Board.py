@@ -114,16 +114,10 @@ def update_board(driver, remote, config):
         locations.append(line[1])  # Get line name
         previous_values.append(get_qty(remote, line[1]))
     red_markers = [False] * line_num  # Keep track of if the font is red for each board
+    inactives = [0] * line_num  # Keep track of minutes passed for each message
     exit_condition = False
     while not exit_condition:  # This goes until someone closes command prompt or the end time is reached
         time.sleep(1)  # This prevents the while loop from executing about a billion times a minute
-        try:  # Check if buttons on the page 
-            find_by_name(driver, "B001")
-        except:
-            auto.write("admin")
-            auto.write(["tab"])
-            auto.write("administrator")
-            auto.write(["enter"])
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
@@ -164,6 +158,17 @@ def update_board(driver, remote, config):
 
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
+            locate_by_name(driver, "Main")
+        elif current_second == "30":
+            time.sleep(1)
+            auto.click(auto.locateOnScreen('Log_Out.png'))
+            time.sleep(1)
+            auto.click(auto.locateOnScreen('Log_In.png'))
+            time.sleep(1)
+            auto.write("admin")
+            auto.write(["tab"])
+            auto.write("administrator")
+            auto.write(["return"])
             locate_by_name(driver, "Main")
 
 def setup_message(driver, remote, config):
@@ -270,7 +275,6 @@ if config.read('KPIt.ini'):
     print("KPIt.ini file successfully read in")
     lines = config.sections()[0]
     line_num = len(config.items(lines))
-    inactives = [0] * line_num  # Keep track of minutes passed for each message
 else:
     print("Couldn't read in KPIt.ini, make sure it's in the same directory")
     exit()
