@@ -37,6 +37,13 @@ to type in the credentials. I'm assuming that failing to do so before the next u
 and the program will restart. Even though this restart would "fix" everything, all inactivity progress would be lost.
 In addition, deploying a program that will raise an error every half hour doesn't sound good.
 
+Update 12/23/2020: It seems that the alert is so special that when it shows up, the program stops at its current line
+and freezes up. This has prevented many solutions such as alert_is_present, action chains, and pyautogui. I did find
+one exception to this though. Triggering a login prompt via selenium will result in the program freezing up and 
+rendering the rest of the execution null. However, triggering a login prompt via manual mouse clicks doesn't freeze
+the program, allowing for pyautogui to log in again. The program updates the board every minute; now, it also logs
+out and logs back in between those minutes to refresh activity.
+
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
