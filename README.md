@@ -78,3 +78,8 @@ while loop. The program will always restart unless the try block fully executes 
 the one that sets the conditions to break the while loop.
 
 This program's goal has yet to be physically implemented. Even then, I imagine I'll have to revisit the code to fix bugs.
+
+3x5 board: 3 rows, 5 light panels in a row, 8 character limit per row with current font (05x07 Fixed Spacing)
+3x4 board: 3 rows, 4 light panels in a row, possible 6 character limit per row given that one character is 5 bulbs wides with the current font (05x07 Fixed Spacing)
+The only font that would increase the character limit per row is 04x05 Prop Spacing. The downside is that the 05 makes the text much smaller than the 07. This means,
+the text might be difficult to see from a distance.
