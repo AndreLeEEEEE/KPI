@@ -1,3 +1,5 @@
+# This is for a 3x5 message board
+
 import pyautogui as auto
 import time
 import re
