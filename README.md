@@ -44,6 +44,10 @@ rendering the rest of the execution null. However, triggering a login prompt via
 the program, allowing for pyautogui to log in again. The program updates the board every minute; now, it also logs
 out and logs back in between those minutes to refresh activity.
 
+Update 12/29/2020: An updated copy of the original program has been fully adapted for a 3x4 board. This new program
+also requires the use of an updated .ini file. In addition, I'm thinking about changing the text color to blue or
+white if the line meets its quota. This way, the text won't turn red despite the quota being met.
+
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
