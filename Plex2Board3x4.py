@@ -54,13 +54,11 @@ def get_qty(web_driver, location):
 def get_time():
     """Returns the current time in regular time."""
     reg_time = time.strftime("%H:%M", time.localtime())  # this is a str '##:##'
-    if int(reg_time[:2]) > 12:  # If pm
+    if int(reg_time[:2]) > 12:  # If the hour is past noon
         reg_time = str(int(reg_time[:2])-12) + reg_time[2:]  # Change to regular time
-        reg_time += "P"
-    else:  # If am
-        reg_time += "A"
+    else:  # If noon or before
         if reg_time[0] == "0":
-            reg_time = reg_time[1:]  # Drop the first 0 in am times
+            reg_time = reg_time[1:]  # Drop the first 0 if present
 
     return reg_time  # Returns a string
 
@@ -90,8 +88,8 @@ def update_board(driver, remote, config):
             message.send_keys(Keys.ARROW_UP)
         message.send_keys(Keys.ARROW_DOWN)
         message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
-        for go in range(6):  # Clear everything on this line
-            message.send_keys(Keys.BACKSPACE)  # 6 times because longest case could be "12:00P"
+        for go in range(5):  # Clear everything on this line
+            message.send_keys(Keys.BACKSPACE)  # 5 times because longest case could be "12:00"
         message.send_keys(clock)
 
         for go in range(3):  # Go one line beyond the last line
@@ -127,7 +125,7 @@ def update_board(driver, remote, config):
         current_second = time.strftime("%S", time.localtime())
         if current_second == "00":
             clock = get_time()
-            if clock == "4:30 pm":  # Stop updating at the end of the day
+            if clock == "4:30":  # Stop updating at the end of the day
                 exit_condition = True
                 break
 
@@ -146,7 +144,7 @@ def update_board(driver, remote, config):
                 num_drop = get_qty(remote, locations[index])
                 if num_drop == previous_values[index]:
                     #  If the current qty equals the previous qty
-                    inactivity = config.sections()[2]  # Inactivity section
+                    inactivity = config.sections()[3]  # Inactivity section
                     time_limit = config.items(inactivity)[index][1]  # In minutes
                     if time_limit == "x":  # There is no time limit
                         continue  # Exit this iteration
@@ -191,11 +189,14 @@ def setup_message(driver, remote, config):
 
             message.send_keys(get_time())
             message.send_keys(Keys.RETURN)
-            message.send_keys(location)
+
+            section = config.sections()[1]  # PrintingName section
+            trunc_loc = config.items(section)[index][1]
+            message.send_keys(trunc_loc)
             message.send_keys(Keys.RETURN)
             message.send_keys(total)  # Fill in with value from Plex
 
-            section = config.sections()[1]  # Goal section
+            section = config.sections()[2]  # Goal section
             quota = config.items(section)[index][1]
             if int(quota) != 0:  # If there's a quota for the day
                 message.send_keys("/")
@@ -275,8 +276,8 @@ def main(driver, remote, config):
 
 PATH = "chromedriver.exe"  # Put chromedriver.exe into the same directory
 config = ConfigParser()
-if config.read('KPIt.ini'):
-    print("KPIt.ini file successfully read in")
+if config.read('KPIt_3x4.ini'):
+    print("KPIt_3x4.ini file successfully read in")
     lines = config.sections()[0]
     line_num = len(config.items(lines))
 else:
