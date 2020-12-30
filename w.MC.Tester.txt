@@ -1,18 +1,6 @@
-remote.get("https://accounts.plex.com/interaction/fea73869-0eda-4f67-b381-c167be521da6#ilp=woW7Rk4HS5ijknMk0L8Jjl8&ie=1606149525001")
-parent = "//form[@class='form-horizontal']//div[@class='plex-idp-wrapper']"  # Allows access to input fields, which are hidden
-# Enter in company code
-form = remote.find_element_by_xpath(parent + "//div[@id='companyCodeInput']//div[@class='col-sm-12']//input[@id='inputCompanyCode3']")
-form.send_keys("wanco")
-action = ActionChains(remote)
-action.send_keys(Keys.RETURN).perform()
-time.sleep(.5)
-# Enter in username
-form = remote.find_element_by_xpath(parent + "//div[@id='usernameInput']//div[@class='col-sm-12']//input[@id='inputUsername3']")
-form.send_keys("w.mc.tester")
-action.perform()
-time.sleep(.5)
-# Enter in password
-form = remote.find_element_by_xpath(parent + "//div[@id='passwordInput']//div[@class='col-sm-12']//input[@id='inputPassword3']")
-form.send_keys("test1wanco")
-action.perform()
-time.sleep(.5)
+Generic credentials for Plex:
+w.mc.tester
+test1wanco
+
+These don't have much use since as an extremely generic account, its access to stuff is really limited. It cannot
+be used for this project since it doesn't have access to Production History.
