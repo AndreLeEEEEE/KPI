@@ -1,0 +1,27 @@
+Program's operation:
+This program runs using automation. Its operation doesn't require human inputs. In fact, it'll most likely fail should human input be applied.
+When starting the program, click on the executable and leave the computer alone. The program will stop itself when the time is 4:30. If the 
+program needs to be stopped earlier, close the command prompt (black window). This will also close the generated chrome windows.
+
+KPI file:
+In the KPI file, you'll find 4 sections: Workcenter, PrintingNames, Goal, and Inactivity(min). Each section has the same amount of entries.
+The amount of entries is equal to the amount of lines that'll be displayed on the board. 
+- Workcenter contains all the full names of lines, and these are needed to search up a line's production history on Plex.
+- PrintingNames contains all the shorten versions of line names. Not every line can fit their full name on a 3x4 message board, so
+this section holds all the names that will be printed out
+- Goal contains the quota each line has for the day. If a line doesn't have a quota, that's represented in the file as 0
+- Inactivity(min) contains what are essentially time limits for each line. Counting in minutes, it's the amount of
+time a line has to produce at least one of their product. No inactivity time limit is represented by a lowercase letter 'x'
+If you want to add a line, you must add new entries for it in all the sections.
+If you want to remove a line, you must remove all of their corresponding entries from the sections.
+Make sure that none of the entry indentifiers (the text on the left side of the equal symbols) are the same. These indentifiers must be
+be different or else the program can't read the file in.
+
+Message board:
+During the program's operation, the message board will cycle through "pages" for each line/workcenter.
+Each page will contain the current time (am/pm can't fit on a 3x4), shortened line name, their current total product, and a quota if present.
+All text will start as green. However, if a line doesn't increase their total product within their inactivity time frame, the text will turn red.
+It'll stay red until the line produces one more of their product. At this point, the text will revert back to green and the inactivity counter
+will reset. If a line has a quota and achieves it, their text will turn blue. Once blue, the text can no longer change to green or red. 
+If a line doesn't have a quota, their text will never turn blue.
+If a line doesn't have an inactivity time limit, their text will never turn red.
