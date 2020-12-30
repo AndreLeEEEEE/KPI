@@ -111,6 +111,32 @@ def update_board(driver, remote, config):
         message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
         message.send_keys(get_qty(remote, location))
 
+    def check_txt_color(index, locations, prev_val, red_mark, inact):
+        """Change the text color of a line when necessary."""
+        num_drop = get_qty(remote, locations[index])  # A string variable
+        quota = config.sections()[2]  # Goal section
+        quota = config.items(quota)[index][1]  # A string variable
+        if num_drop >= quota and int(quota) != 0:
+            # If the quota exists and has been met
+            change_color(driver, index, "Blue")
+        elif num_drop == prev_val[index]:
+            # If the current qty equals the previous qty
+            inactivity = config.sections()[3]  # Inactivity section
+            time_limit = config.items(inactivity)[index][1]  # In minutes
+            if time_limit == "x":  # There is no time limit
+                return  # Exit this iteration
+            if (inact[index] >= int(time_limit)) and (red_mark[index] == False):
+            # If the time passed without a new drop equals or exceeds the line's time limit
+            # and the font is red
+                change_color(driver, index, "Red")
+                red_mark[index] = True
+        else:
+            if red_mark[index] == True:  # if the text is red
+                change_color(driver, index, "Green")  # Revert back
+                red_mark[index] = False
+            inact[index] = 0  # Reset counter
+            prev_val[index] = num_drop  # Update previous value
+
     locations = []  # Store the locations for many uses later
     previous_values = []  # Store the previous qty's
     workcenter = config.sections()[0]  # Workcenter section
@@ -137,28 +163,11 @@ def update_board(driver, remote, config):
                 inactives[index] += 1  # Increase the minutes passed for the current line
                 update(message, clock, locations[index])  # Where time and qty get changed
 
-            for index in range(line_num):  
+            for index in range(line_num):
                 # Go through the boards again to check their inactivity time,
                 # because apparently trying to perform the standard update 
                 # alongside the inactivity checking causes an error
-                num_drop = get_qty(remote, locations[index])
-                if num_drop == previous_values[index]:
-                    #  If the current qty equals the previous qty
-                    inactivity = config.sections()[3]  # Inactivity section
-                    time_limit = config.items(inactivity)[index][1]  # In minutes
-                    if time_limit == "x":  # There is no time limit
-                        continue  # Exit this iteration
-                    if (inactives[index] >= int(time_limit)) and (red_markers[index] == False):
-                    # If the time passed without a new drop equals or exceeds the line's time limit
-                    # and the font is red
-                        change_color(driver, index, "Red")
-                        red_markers[index] = True
-                else:
-                    if red_markers[index] == True:  # if the text is red
-                        change_color(driver, index, "Green")  # Revert back
-                        red_markers[index] = False
-                    inactives[index] = 0  # Reset counter
-                    previous_values[index] = num_drop  # Update previous value
+                check_txt_color(index, locations, previous_values, red_markers, inactives)
 
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
