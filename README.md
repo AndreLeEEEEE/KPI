@@ -48,6 +48,13 @@ Update 12/29/2020: An updated copy of the original program has been fully adapte
 also requires the use of an updated .ini file. In addition, I'm thinking about changing the text color to blue or
 white if the line meets its quota. This way, the text won't turn red despite the quota being met.
 
+Update 12/30/2020: When a line has a quota and has met it, the text color will turn blue. This signals that a line
+has achieved their target amount and prevents the text from turning red out of inactivity. Speaking of inactivity, 
+there's an idea of pausing a line when they're on break. The only thing that'd happen for sure during a break is
+the line's inactivity counter ceasing to increment. During this time, I could also make the text color turn into
+one of the two unused colors: amber and white. Or what if I change the total to say "On Break"? I think the latter
+is a better idea since it conveys the message better and too many colors can get confusing.
+
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
@@ -68,9 +75,10 @@ Production History information to check if the amount of trailers dropped increa
 of time a line has spent "idle". In the .ini file, each line has an "inactivity" value. Every time the board gets updated and a line's
 trailer amount hasn't increased, a separate counter increments. When this counter equals the line's inactivity value, that line's
 face text turns red. When the line's trailer amount increases, counter is reset to zero and the text turns back to green. It is
-possible for one line's text to be green and another line's text to be red because the message board cycles through faces. The 
-program will stop when the current time equals the overtime closing time: 4:30 pm. At this point, the program will clear the board,
-bring MBw back to the main menu, and quit both drivers.
+possible for one line's text to be green and another line's text to be red because the message board cycles through faces. In addition,
+text will turn blue if a line's quota has been met. Once blue, the text can't change to another color. The program will stop when the 
+current time equals the overtime closing time: 4:30 pm. At this point, the program will clear the board, bring MBw back to the main menu, 
+and quit both drivers.
 
 Restart Phase
 This phase only occurs if an error prohibits the script's progress. Every function in the program is called, one way or another, through
