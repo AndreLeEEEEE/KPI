@@ -53,7 +53,8 @@ has achieved their target amount and prevents the text from turning red out of i
 there's an idea of pausing a line when they're on break. The only thing that'd happen for sure during a break is
 the line's inactivity counter ceasing to increment. During this time, I could also make the text color turn into
 one of the two unused colors: amber and white. Or what if I change the total to say "On Break"? I think the latter
-is a better idea since it conveys the message better and too many colors can get confusing.
+is a better idea since it conveys the message better and too many colors can get confusing. This project is gonna
+take a physical form soon.
 
 Setup Phase
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
@@ -88,8 +89,6 @@ all remaining inner statements and enters the except block. This block simply pr
 the finally block will quit both drivers to close the windows and free up space in memory. The try/excpet/finally blocks are all in a
 while loop. The program will always restart unless the try block fully executes all of its statements; this includes the last statement,
 the one that sets the conditions to break the while loop.
-
-This program's goal has yet to be physically implemented. Even then, I imagine I'll have to revisit the code to fix bugs.
 
 3x5 board: 3 rows, 5 light panels in a row, 8 character limit per row with current font (05x07 Fixed Spacing)
 3x4 board: 3 rows, 4 light panels in a row, possible 6 character limit per row given that one character is 5 bulbs wides with the current font (05x07 Fixed Spacing)
