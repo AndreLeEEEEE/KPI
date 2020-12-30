@@ -116,7 +116,7 @@ def update_board(driver, remote, config):
         num_drop = get_qty(remote, locations[index])  # A string variable
         quota = config.sections()[2]  # Goal section
         quota = config.items(quota)[index][1]  # A string variable
-        if num_drop >= quota and int(quota) != 0:
+        if int(num_drop) >= int(quota) and int(quota) != 0:
             # If the quota exists and has been met
             change_color(driver, index, "Blue")
         elif num_drop == prev_val[index]:
