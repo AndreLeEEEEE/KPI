@@ -1,4 +1,4 @@
-# This is for a 3x5 message board
+# For a 3x5 board
 
 import pyautogui as auto
 import time
@@ -96,14 +96,15 @@ def update_board(driver, remote, config):
 
         for go in range(3):  # Go one line beyond the last line
             message.send_keys(Keys.ARROW_DOWN)
-        all_lines = message.text.split()
-        if len(all_lines) == 6:  # Check for quota
+        all_lines = message.text.split()  # Separate the entire message into an array
+        if len(all_lines) == 6:  # Check for quota, which should be the sixth item
             for go in range(5):  # Go to just after the current total if the quota is one digit
                 message.send_keys(Keys.ARROW_LEFT)
             if len(all_lines[5]) == 2: # If the quota is two digits
                 message.send_keys(Keys.ARROW_LEFT)  # Go left one more time
         else:
             message.send_keys(Keys.ARROW_LEFT)  # Go left once to reach end of total
+
         if len(all_lines[3]) == 2:  # If the current total has two digits
             message.send_keys(Keys.BACKSPACE)  # Backspace one more time
         message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
@@ -161,7 +162,7 @@ def update_board(driver, remote, config):
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
             locate_by_name(driver, "Main")
-        elif current_second == "30":  # Every half minute, redo the login so the window doesn't register "inactivity"
+        elif current_second == "30":
             time.sleep(1)
             auto.click(auto.locateOnScreen('Log_Out.png'))
             time.sleep(1)
@@ -273,8 +274,8 @@ def main(driver, remote, config):
 
 PATH = "chromedriver.exe"  # Put chromedriver.exe into the same directory
 config = ConfigParser()
-if config.read('KPIt.ini'):
-    print("KPIt.ini file successfully read in")
+if config.read('KPIt_3x5.ini'):
+    print("KPIt_3x5.ini file successfully read in")
     lines = config.sections()[0]
     line_num = len(config.items(lines))
 else:

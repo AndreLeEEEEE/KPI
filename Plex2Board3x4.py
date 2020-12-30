@@ -285,8 +285,8 @@ def main(driver, remote, config):
 
 PATH = "chromedriver.exe"  # Put chromedriver.exe into the same directory
 config = ConfigParser()
-if config.read('KPIt_3x4.ini'):
-    print("KPIt_3x4.ini file successfully read in")
+if config.read('KPIt.ini'):
+    print("KPIt.ini file successfully read in")
     lines = config.sections()[0]
     line_num = len(config.items(lines))
 else:
