@@ -86,7 +86,7 @@ text will turn blue if a line's quota has been met. Once blue, the text can't ch
 current time equals the overtime closing time: 4:30 pm. At this point, the program will clear the board, bring MBw back to the main menu, 
 and quit both drivers. Before inactivity is incremented for a line, the program will check if the line is on break or not. If not,
 inactivity is incremented. If they're on break, inactivity is stalled. The other service this check provides is toggling breaks when
-the current time matches on in the .ini file.
+the current time matches one in the .ini file.
 
 Restart Phase:
 This phase only occurs if an error prohibits the script's progress. Every function in the program is called, one way or another, through
