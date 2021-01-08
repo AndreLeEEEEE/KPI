@@ -84,7 +84,7 @@ def update_board(driver, remote, config):
     """Will update the time and total on the board."""
     def update(message, clock, location):
         """Where all the writing happens for one panel."""
-        for go in range(3):  # Get to the top of the text box
+        for go in range(4):  # Get to the top of the text box
             message.send_keys(Keys.ARROW_UP)
         message.send_keys(Keys.ARROW_DOWN)
         message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
