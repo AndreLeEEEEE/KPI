@@ -56,6 +56,11 @@ one of the two unused colors: amber and white. Or what if I change the total to 
 is a better idea since it conveys the message better and too many colors can get confusing. This project is gonna
 take a physical form soon.
 
+Update 1/8/2021: There a third python file in the repository called Plex2Board(WithBreak) that's based off of the
+Plex2Board3x4 file. While the latter is a program to print information from Plex to a message board, Plex2Board(WithBreak)
+is that with a feature to stop the inactivity counter for separate lines when they go on break. The break times 
+for lines are a new section of the .ini file.
+
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
@@ -79,7 +84,9 @@ face text turns red. When the line's trailer amount increases, counter is reset 
 possible for one line's text to be green and another line's text to be red because the message board cycles through faces. In addition,
 text will turn blue if a line's quota has been met. Once blue, the text can't change to another color. The program will stop when the 
 current time equals the overtime closing time: 4:30 pm. At this point, the program will clear the board, bring MBw back to the main menu, 
-and quit both drivers.
+and quit both drivers. Before inactivity is incremented for a line, the program will check if the line is on break or not. If not,
+inactivity is incremented. If they're on break, inactivity is stalled. The other service this check provides is toggling breaks when
+the current time matches on in the .ini file.
 
 Restart Phase:
 This phase only occurs if an error prohibits the script's progress. Every function in the program is called, one way or another, through
