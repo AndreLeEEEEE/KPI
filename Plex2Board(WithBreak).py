@@ -85,8 +85,8 @@ def update_board(driver, remote, config):
     # Inner functions
     def update(message, clock, location, break_time):
         """Where all the writing happens for one panel."""
-        for go in range(4):  # Move the cursor to the top left of the box
-            message.send_keys(Keys.ARROW_UP)
+        for go in range(21):  # Move the cursor to the top left of the box
+            message.send_keys(Keys.ARROW_LEFT)
         message.send_keys(Keys.ARROW_DOWN)
         message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
         if break_time[0] == True:  # If on break, go left pass the asterik
@@ -142,9 +142,9 @@ def update_board(driver, remote, config):
 
     def toggle_break(page, curr_time, line_break):
         """Signify that a line is on break."""
-        if curr_time.strip() == line_break[-1].strip():  # If time for a break toggle
-            for go in range(4):  # Move the cursor to the top left of the box
-                page.send_keys(Keys.ARROW_UP)
+        if curr_time == line_break[-1]:  # If time for a break toggle
+            for go in range(21):  # Move the cursor to the top left of the box
+                page.send_keys(Keys.ARROW_LEFT)
             page.send_keys(Keys.ARROW_DOWN)
             page.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
             line_break.pop()  # Remove the last element since that time has now passed
@@ -176,8 +176,8 @@ def update_board(driver, remote, config):
                 remote.quit()
                 driver.quit()
                 exit()
-            breaks[index].append(_time_.split('-')[0])  # Append a break start
-            breaks[index].append(_time_.split('-')[1])  # Append a break end
+            breaks[index].append((_time_.split('-')[0]).strip())  # Append a break start
+            breaks[index].append((_time_.split('-')[1]).strip())  # Append a break end
         # The list is reversed so the most recent times can be popped off the end
         # without affecting the placement of the boolean marker
         breaks[index] = breaks[index][::-1]
@@ -343,7 +343,8 @@ while restart:  # The program will restart itself if an error occurs
         driver = webdriver.Chrome(PATH)
         main(driver, remote, config)
         restart = False
-    except:
+    except Exception as e:
+        print("As error has occurred: ", e.__class__)
         print("Restarting program")
     finally:
         remote.quit()  # It's very important that quit is called on both drivers
