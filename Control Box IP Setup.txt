@@ -1,0 +1,19 @@
+In the event that there's issues connecting to the web browser version of the message board, make sure that the ethenet cable from the control box
+is actually connected to the computer. Also, make sure that the option to have an ethernet connection is enabled.
+- If neither aren't the issue, then go to the computer 'Settings' and click on the 'Network and Internet' section. 
+- Find the 'Ethernet' section on the list on the left side of the window.
+- Look under the 'Related settings' list for 'Change adapter options'
+- A new window should've been opened called 'Network Connections'
+- Right-click on the ethernet icon and select 'Properties'
+- In the list, find 'Internet Protocol Version 4 (TCP/IPv4)' and click the 'Properties' button
+- Select the option: 'Use the following IP address' and enter in the control box's IP address
+
+You can find the control box's IP address through this sequence:
+- Menus
+- Advanced Menu
+- Modem/GPS
+- IP Address
+You only need to enter in the box's IP address into the computer, the 'Subnet Mask' section will fill itself out.
+Ignore the 'Gateway' section too.
+
+Confirm that the board's web broswer form is accessible by typing in the IP address in the URL bar.
