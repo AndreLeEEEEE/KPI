@@ -16,7 +16,7 @@ Requirements:
 - Ethernet cable connection to an active message board
 
 Abbreviations:
-Message Board window = MBw
+Message Board window = MBw,
 Plex window = Pw
 
 There are three phases to this script: Setup, Update, Restart.
