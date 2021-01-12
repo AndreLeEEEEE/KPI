@@ -25,3 +25,7 @@ It'll stay red until the line produces one more of their product. At this point,
 will reset. If a line has a quota and achieves it, their text will turn blue. Once blue, the text can no longer change to green or red. 
 If a line doesn't have a quota, their text will never turn blue.
 If a line doesn't have an inactivity time limit, their text will never turn red.
+
+If changes have to be manually made to the board, exit the program because it'd be useless for it to run if human interaction
+is required. The login credentials for the board's site is in the python code; but in case you don't want to search for it,
+the username is 'admin' and the password is 'administrator'.
