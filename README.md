@@ -8,7 +8,7 @@ Versions of python and installed modules:
 - selenium 3.141.0
 - ChromeDriver 80.0.3987.106
 - Visual Studio 16.8.4
-- numpy 1.19.3 (Do not update to 1.19.4! It was recently discovered that this version doesn't pass a "sanity check", thus it'll raise an error in the program)
+- numpy 1.19.5
 
 Requirements:
 - Plex login for Wanco
