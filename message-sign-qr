@@ -1,5 +1,17 @@
+<style>
+#imgtext {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  color: black;
+  font-size: 25px;
+}
+</style>
+
+<div>
 <h1 style="text-align: center;">Message Sign Troubleshooting</h1>
 <img class="wp-image-16171 aligncenter" src="https://www.wanco.com/wp-content/uploads/2020/03/gallery-prod-msgbd-kits-matrix-1024x700.jpg" alt="" width="429" height="293" />
+</div>
 
 &nbsp;
 <h2 style="text-align: center;">Product Thumbnails</h2>
@@ -29,9 +41,43 @@
 <img class="wp-image-11027 size-thumbnail" style="float: left;" src="https://www.wanco.com/wp-content/uploads/2017/06/thumb-prod-msgbd-polemnt-150x150.jpg" alt="" width="150" height="150" />
 </a></div>
 </div>
+<div style="text-align: center; font-size: 28px; padding-top: 25px;">
+<a href="https://www.wanco.com/products/variable-message-signs/">Message Signs Page</a>
+</div>
 &nbsp;
 
+<div style="content: ''; clear: both; display: table;">
+  <div style="padding: 10px; float: left; width: 25%;">
+    <img src="https://www.wanco.com/wp-content/uploads/2017/06/thumb-prod-msgbd-matrix-full.jpg" alt="Full One" style="cursor: pointer;" onclick="myFunction(this);">
+  </div>
+  <div style="padding: 10px; float: left; width: 25%;">
+    <img src="https://www.wanco.com/wp-content/uploads/2017/06/thumb-prod-msgbd-3line-full.jpg" alt="Full Two" style="cursor: pointer;" onclick="myFunction(this);">
+  </div>
+  <div style="padding: 10px; float: left; width: 25%;">
+    <img src="https://www.wanco.com/wp-content/uploads/2020/04/thumb-prod-msgbd-matrix-mini.jpg" alt="Mini One" style="cursor: pointer;" onclick="myFunction(this);">
+  </div>
+  <div style="padding: 10px; float: left; width: 25%;">
+    <img src="https://www.wanco.com/wp-content/uploads/2020/04/thumb-prod-msgbd-3line-mini.jpg" alt="Mini Two" style="cursor: pointer;" onclick="myFunction(this);">
+  </div>
+</div>
+
+<div style="position: relative; display: none;">
+  <span onclick="this.parentElement.style.display='none'" style="position: absolute; top: 10px; right: 15px; color: black; font-size: 35px; cursor: pointer;">&times;</span>
+  <img id="expandedImg" style="width:100%">
+  <div id="imgtext"></div>
+</div>
+
+<script>
+function myFunction(imgs) {
+  var expandImg = document.getElementById("expandedImg");
+  var imgText = document.getElementById("imgtext");
+  expandImg.src = imgs.src;
+  imgText.innerHTML = imgs.alt;
+  expandImg.parentElement.style.display = "block";
+}
+</script>
 &nbsp;
+
 <h2 style="text-align: center;">Troubleshooting Videos Links</h2>
 <ul>
  	<li><a style="font-size: 30px;" href="https://www.youtube.com/watch?v=2BQh5-phOk8" target="_blank" rel="noopener noreferrer">Logging In</a></li>
@@ -41,7 +87,7 @@
 </ul>
 &nbsp;
 <h2 style="text-align: center;">Embedded Troubleshooting Videos</h2>
-<div style="content: ''; clear: both; display: table;">
+<div style="content: ''; clear: both;">
 <div style="float: left; width: 33.33%; padding: 5px;">
 
 [video width="1280" height="720" mp4="https://www.wanco.com/wp-content/uploads/2021/01/Wanco-Message-Sign_-Sizes.mp4"][/video]
@@ -58,7 +104,7 @@
 
 </div>
 </div>
-<div style="content: ''; clear: both; display: table;">
+<div style="content: ''; clear: both;">
 <div style="float: left; width: 33.33%; padding: 5px;">
 
 [video width="1280" height="720" mp4="https://www.wanco.com/wp-content/uploads/2021/01/Wanco-Message-Sign_-Sizes.mp4"][/video]
@@ -74,4 +120,20 @@
 [video width="1280" height="720" mp4="https://www.wanco.com/wp-content/uploads/2021/01/Wanco-Message-Sign-Operation_-Radar-Messages.mp4"][/video]
 
 </div>
+</div>
+
+&nbsp;
+<div style="font-size: 30px; display: flex; justify-content: center;">
+<p style="padding-right: 8px;">Quickstart - </p>
+<a href="https://www.wanco.com/wp-content/uploads/2021/02/sample.pdf" download>Download the pdf</a>
+</div>
+<div style="font-size: 30px; display: flex; justify-content: center;">
+<p style="padding-right: 8px;">Manual - </p>
+<a href="https://www.wanco.com/wp-content/uploads/2021/02/sample.pdf" download>Download the pdf</a>
+</div>
+
+&nbsp;
+<div style="font-size: 30px;">
+<p>Part order<span style="color:gray"> (Coming soon?)</span></p>
+<p>Maintenance schedule<span style="color:gray"> (Coming soon?)</span></p>
 </div>
