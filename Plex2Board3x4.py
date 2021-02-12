@@ -80,14 +80,24 @@ def change_align(driver, index):
     select_drop(driver, "AlignA002", "Center")
     locate_by_name(driver, "Ok")
 
+def login():
+    """Login into the message board."""
+    auto.write("admin")  # Since the username field is already active and embedded, write admin
+    auto.write(["tab"])  # Go to the password field
+    auto.write("administrator")
+    auto.write(["enter"])
+
 def update_board(driver, remote, config):
     """Will update the time and total on the board."""
-    def update(message, clock, location):
+    # Inner functions
+    def update(message, clock, location, break_time):
         """Where all the writing happens for one panel."""
-        for go in range(4):  # Get to the top of the text box
-            message.send_keys(Keys.ARROW_UP)
+        for go in range(21):  # Move the cursor to the top left of the box
+            message.send_keys(Keys.ARROW_LEFT)
         message.send_keys(Keys.ARROW_DOWN)
         message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
+        if break_time[0] == True:  # If on break, go left pass the asterik
+            message.send_keys(Keys.ARROW_LEFT)
         for go in range(5):  # Clear everything on this line
             message.send_keys(Keys.BACKSPACE)  # 5 times because longest case could be "12:00"
         message.send_keys(clock)
@@ -137,15 +147,52 @@ def update_board(driver, remote, config):
             inact[index] = 0  # Reset counter
             prev_val[index] = num_drop  # Update previous value
 
+    def toggle_break(page, curr_time, line_break):
+        """Signify that a line is on break."""
+        if curr_time == line_break[-1]:  # If time for a break toggle
+            for go in range(21):  # Move the cursor to the top left of the box
+                page.send_keys(Keys.ARROW_LEFT)
+            page.send_keys(Keys.ARROW_DOWN)
+            page.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
+            line_break.pop()  # Remove the last element since that time has now passed
+            if line_break[0] == True:  # Turn break off
+                page.send_keys(Keys.BACKSPACE)  # Remove the '*'
+                line_break[0] = False  # Mark this line as not on break
+            else:  # Turn break on
+                page.send_keys("*")  # Add an '*' to sigify a break
+                line_break[0] = True  # Mark this line as on break
+        # On break, don't increment inactivity. Not on break, increment inactivity
+        return False if line_break[0] == True else True
+
+    # Variables
     locations = []  # Store the locations for many uses later
     previous_values = []  # Store the previous qty's
-    workcenter = config.sections()[0]  # Workcenter section
-    for line in config.items(workcenter):  # Get the corresponding value in the file
+    section = config.sections()[0]  # Workcenter section
+    for line in config.items(section):  # Get the corresponding value in the file
         locations.append(line[1])  # Get line name
-        previous_values.append(get_qty(remote, line[1]))
-    red_markers = [False] * line_num  # Keep track of if the font is red for each board
+        previous_values.append(get_qty(remote, line[1]))  # Initial qty's for comparison
+    red_markers = [False] * line_num  # Keeps track of which lines are red
+    section = config.sections()[4]  # Breaks section
+    breaks = []
+    for index, line in enumerate(config.items(section)):  # Get the break times for lines
+        breaks.append([])  # Add a list for a line
+        for _time_ in (line[1].split(',')):  # Iterating over a list of break periods
+            if '-' not in _time_:  # If the Breaks section contains errors
+                print("Incorrect format for breaks in Breaks section of .ini file")
+                # The program resetting isn't going to fix that, so end it all
+                remote.quit()
+                driver.quit()
+                exit()
+            breaks[index].append((_time_.split('-')[0]).strip())  # Append a break start
+            breaks[index].append((_time_.split('-')[1]).strip())  # Append a break end
+        # The list is reversed so the most recent times can be popped off the end
+        # without affecting the placement of the boolean marker
+        breaks[index] = breaks[index][::-1]
+        breaks[index].insert(0, False)  # Put a False at the beginning
     inactives = [0] * line_num  # Keep track of minutes passed for each message
-    exit_condition = False
+    exit_condition = False  # Will be False until the natural end is reached
+
+    # The continuous process
     while not exit_condition:  # This goes until someone closes command prompt or the end time is reached
         time.sleep(1)  # This prevents the while loop from executing about a billion times a minute
         current_second = time.strftime("%S", time.localtime())
@@ -160,8 +207,9 @@ def update_board(driver, remote, config):
             locate_by_id(driver, "MS001C1")  # Click 'modify msg'
             messages = driver.find_elements(By.NAME, "MessageEditorText")
             for index, message in enumerate(messages):  # For each line
-                inactives[index] += 1  # Increase the minutes passed for the current line
-                update(message, clock, locations[index])  # Where time and qty get changed
+                if toggle_break(message, clock, breaks[index]):  # Check if a break is on
+                    inactives[index] += 1  # Increase the minutes passed for the current line
+                update(message, clock, locations[index], breaks[index])  # Where time and qty get changed
 
             for index in range(line_num):
                 # Go through the boards again to check their inactivity time,
@@ -169,19 +217,19 @@ def update_board(driver, remote, config):
                 # alongside the inactivity checking causes an error
                 check_txt_color(index, locations, previous_values, red_markers, inactives)
 
+            time.sleep(1)
             locate_by_name(driver, "Save")
             locate_by_id(driver, "MS000C1")  # Click activate msg
             locate_by_name(driver, "Main")
-        elif current_second == "30":
+        elif current_second == "30":  # Halfway through every minute
+            # "Reset" the board window session time
             time.sleep(1)
-            auto.click(auto.locateOnScreen('Log_Out.png'))
+            # locateOnScreen function needed as using selenium to 
+            # click the logout button freezes the program
+            auto.click(auto.locateOnScreen("Logout.png"))
             time.sleep(1)
-            auto.click(auto.locateOnScreen('Log_In.png'))
-            time.sleep(1)
-            auto.write("admin")
-            auto.write(["tab"])
-            auto.write("administrator")
-            auto.write(["return"])
+            auto.click(auto.locateOnScreen("Login.png"))
+            login()
             locate_by_name(driver, "Main")
 
 def setup_message(driver, remote, config):
@@ -249,10 +297,7 @@ def setup_plex(remote):
 def setup_board(driver):
     """Get the board ready for use."""
     driver.get("http://192.168.13.100:82/")  # Open the IP address
-    auto.write("admin")  # Since the username field is already active and embedded, write admin
-    auto.write(["tab"])  # Go to the password field
-    auto.write("administrator")
-    auto.write(["enter"])
+    login()
     try:  # 90% of the html are nested within frames, specifically the second frame
         frames = driver.find_elements_by_tag_name("frame")
         WebDriverWait(driver, 10).until(
@@ -301,7 +346,8 @@ while restart:  # The program will restart itself if an error occurs
         driver = webdriver.Chrome(PATH)
         main(driver, remote, config)
         restart = False
-    except:
+    except Exception as e:
+        print("As error has occurred: ", e.__class__)
         print("Restarting program")
     finally:
         remote.quit()  # It's very important that quit is called on both drivers
