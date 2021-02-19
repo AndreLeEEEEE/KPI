@@ -61,6 +61,10 @@ Plex2Board3x4 file. While the latter is a program to print information from Plex
 is that with a feature to stop the inactivity counter for separate lines when they go on break. The break times 
 for lines are a new section of the .ini file.
 
+Update 2/19/2021: A new warning appears alongside the usual (and multiple) "handshake failed" warning. This new warning
+happens once or twice a run and it mentions how the "bluetooth adapter failed". Akin to the handshake warning, the 
+bluetooth warning can also be ignored.
+
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
