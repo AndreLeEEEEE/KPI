@@ -65,6 +65,9 @@ Update 2/19/2021: A new warning appears alongside the usual (and multiple) "hand
 happens once or twice a run and it mentions how the "bluetooth adapter failed". Akin to the handshake warning, the 
 bluetooth warning can also be ignored.
 
+Update 2/26/2021: The file, 'Plex2Board(WithBreak)', has essentially been assimulated into 'Plex2Board3x4'. Thus,
+the former was deleted.
+
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
