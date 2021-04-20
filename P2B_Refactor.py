@@ -257,7 +257,7 @@ def setup_plex(remote):
     """Get plex ready for use."""
     remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
     remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
-    remote.find_element_by_name("txtPassword").send_keys("OokyOoki2")
+    remote.find_element_by_name("txtPassword").send_keys("FmSb234_po")  #OokyOoki2  #dArk48_kF
     remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
     remote.find_element_by_id("btnLogin").click()
     remote.switch_to.window(remote.window_handles[1])
@@ -270,9 +270,7 @@ def setup_plex(remote):
     action.send_keys("Production History").send_keys(Keys.RETURN).perform()
     action = 404
     time.sleep(1)
-    action = ActionChains(remote)
-    action.send_keys(Keys.DOWN).send_keys(Keys.RETURN).perform()
-    time.sleep(1)
+    auto.click(auto.locateOnScreen("PH.png"))
 
 def setup_board(driver):
     """Get the board ready for use."""
