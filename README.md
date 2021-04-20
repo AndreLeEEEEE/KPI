@@ -68,6 +68,12 @@ bluetooth warning can also be ignored.
 Update 2/26/2021: The file, 'Plex2Board(WithBreak)', has essentially been assimulated into 'Plex2Board3x4'. Thus,
 the former was deleted.
 
+Update 4/20/2021: The section that slected "Production History" is now more universal. Instead of using selenium to
+press the down arrow key and enter to select production history, pyautogui will search for the image. This means that 
+the user must switch between the MBw and Pw a couple of times. First, the MBw must be in front to allow the program to
+login. Second, the Pw must be in front to allow production history to be selected (this comes after Mbw is logged in).
+Last, switch MBw back to the front for the rest of the program's operation.
+
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
