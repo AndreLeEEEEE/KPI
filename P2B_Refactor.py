@@ -98,6 +98,9 @@ def update_board(driver, remote, config):
         message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
         message.send_keys(get_qty(remote, location))
 
+        if toggle_break(clock, breaks[index]):  # Check if a break is on
+                    inactives[index] += 1  # Increase the minutes passed for the current line
+
     def check_txt_color(index, locations, prev_val, red_mark, inact):
         """Change the text color of a line when necessary."""
         num_drop = get_qty(remote, locations[index])  # A string variable
@@ -144,7 +147,7 @@ def update_board(driver, remote, config):
     # Variables
     locations = []  # Store the locations for many uses later
     previous_values = []  # Store the previous qty's
-    for line in config.items(lines):  # Get the corresponding value in the file
+    for line in lines:  # Get the corresponding value in the file
         locations.append(line[1])  # Get line name
         previous_values.append(get_qty(remote, line[1]))  # Initial qty's for comparison
     red_markers = [False] * line_num  # Keeps track of which lines are red
@@ -178,14 +181,11 @@ def update_board(driver, remote, config):
                 exit_condition = True
                 break
 
-            find_by(driver, "name", "B004", 1)
-            find_by(driver, "id", "MS000C1", 1)
-            find_by(driver, "id", "MS001C1", 1)
-            messages = find_by(driver, "id", "MessageEditorText")
+            find_by(driver, "id", "MS4003C1", 1)  # Quick Message
+            find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
             for index in range(line_num):  # For each line
-                update(message, clock, locations[index], breaks[index])  # Where time and qty get changed
-                if toggle_break(clock, breaks[index]):  # Check if a break is on
-                    inactives[index] += 1  # Increase the minutes passed for the current line
+                message = find_by(driver, "id", "MessageEditorText")
+                update(message, clock, locations[index], breaks[index])
 
             for index in range(line_num):
                 # Go through the boards again to check their inactivity time,
