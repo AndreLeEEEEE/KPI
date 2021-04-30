@@ -182,7 +182,7 @@ def update_board(driver, remote, config):
             find_by(driver, "id", "MS000C1", 1)
             find_by(driver, "id", "MS001C1", 1)
             messages = find_by(driver, "id", "MessageEditorText")
-            for index in line_num:  # For each line
+            for index in range(line_num):  # For each line
                 update(message, clock, locations[index], breaks[index])  # Where time and qty get changed
                 if toggle_break(clock, breaks[index]):  # Check if a break is on
                     inactives[index] += 1  # Increase the minutes passed for the current line
@@ -215,9 +215,7 @@ def setup_message(driver, remote, config):
         temp = driver.find_element_by_xpath("//* [contains( text(),' of ')]")  # Get # of #
         for f in int(temp.text.split()[-1])-1:  # Delete all previous pages
             find_by(driver, "id", "MS4001C1", 1)
-        for j in range(line_num-1):  # Add a page for each line
-            find_by(driver, "id", "MS4000C1", 1)
-        for index in line_num:
+        for index in range(line_num):
             message = find_by(driver, "id", "MessageEditorText")
             location = lines[index][1]  # Get the corresponding value in the file
             total = get_qty(remote, location)
@@ -237,6 +235,11 @@ def setup_message(driver, remote, config):
                 message.send_keys(quota)
 
             find_by(driver, "id", "MS9001C1", 1)  # Change alignment
+            find_by(driver, "name", "Submit", 1)  # Confirm changes for this page
+            # Add a new page, the interface automatically goes to it
+            # Unless this is the last page
+            if line_num - index == 1:
+                find_by(driver, "id", "MS4000C1", 1)
 
     # Navigate to create new message
     find_by(driver, "id", "MS4001C1", 1)  # Blank the board
