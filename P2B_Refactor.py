@@ -4,26 +4,41 @@ import pyautogui as auto
 import time
 import re
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys  # Allows access to non character keys
-from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from configparser import ConfigParser  # Needed to read in from .ini files
 
-def select_drop(web_driver, id, value):
-    """Chooses an option by value in a dropdown box by id."""
-    select = Select(web_driver.find_element_by_id(id))
-    select.select_by_value(value)
-    # Returns nothing
+def find_by(web_driver, attribute, value, click = 0):
+    """Interacts with an element by attribute."""
+    e_wait = WebDriverWait(web_driver, 10)  # Set explicit wait
+    if attribute == "name":
+        element = e_wait.until(
+            EC.presence_of_element_located((By.NAME, value)))
+    elif attribute == "id":
+        element = e_wait.until(
+            EC.presence_of_element_located((By.ID, value)))
+
+    if click:
+        element.click()
+    else:
+        return element
 
 def get_qty(web_driver, location):
     """Returns the current total dropped by one line."""
-    web_driver.implicitly_wait(10)
-    input_box = web_driver.find_element_by_id("flttxtWorkcenter")
+    input_box = find_by(web_driver, "id", "flttxtWorkcenter")
     input_box.clear()
     input_box.send_keys(location)
     for i in range(2):
-        web_driver.find_element_by_id("SubmitLink").click
+        find_by(web_driver, "id", "SubmitLink", 1)
     try:
+        # Finding cur_qty doesn't use the find_by function for two reasons
+        # 1. The explicit wait from find_by is unnecessary since the page is already loaded,
+        # so the element with the class_name should be visible
+        # 2. If the amount of produced units is 0, I'd want to program to know that immediately
+        # as opposed to doing the explicit wait. Thus, not using find_by here is faster
         cur_qty = web_driver.find_element_by_class_name("GridSummaryRow")
         cur_qty = re.findall("\d+", cur_qty.text)
     except:  # If the line has currently made nothing, handle the error by manually assigning zero
@@ -41,24 +56,6 @@ def get_time():
             reg_time = reg_time[1:]  # Drop the first 0 if present
 
     return reg_time  # Returns a string
-
-def change_color(driver, index, colour):
-    """Changes the text color for one message."""
-    color = "ColorP" + str(index)
-    driver.find_element_by_name(color).click
-    select_drop(driver, "ColorA000", colour)
-    select_drop(driver, "ColorA001", colour)
-    select_drop(driver, "ColorA002", colour)
-    driver.find_element_by_name("Ok").click
-
-def change_align(driver, index):
-    """Changes the text alignment for one message."""
-    align = "AlignP" + str(index)
-    driver.find_element_by_name(align).click
-    select_drop(driver, "AlignA000", "Center")
-    select_drop(driver, "AlignA001", "Center")
-    select_drop(driver, "AlignA002", "Center")
-    driver.find_element_by_name("Ok").click
 
 def login():
     """Login into the message board."""
@@ -147,14 +144,13 @@ def update_board(driver, remote, config):
     # Variables
     locations = []  # Store the locations for many uses later
     previous_values = []  # Store the previous qty's
-    section = config.sections()[0]  # Workcenter section
-    for line in config.items(section):  # Get the corresponding value in the file
+    for line in config.items(lines):  # Get the corresponding value in the file
         locations.append(line[1])  # Get line name
         previous_values.append(get_qty(remote, line[1]))  # Initial qty's for comparison
     red_markers = [False] * line_num  # Keeps track of which lines are red
     section = config.sections()[4]  # Breaks section
     breaks = []
-    for index, line in enumerate(config.items(section)):  # Get the break times for lines
+    for index, line in enumerate(config.items(lines)):  # Get the break times for lines
         breaks.append([])  # Add a list for a line
         for _time_ in (line[1].split(',')):  # Iterating over a list of break periods
             if '-' not in _time_:  # If the Breaks section contains errors
@@ -182,14 +178,14 @@ def update_board(driver, remote, config):
                 exit_condition = True
                 break
 
-            driver.find_element_by_name("B004").click
-            driver.find_element_by_id("MS000C1").click
-            driver.find_element_by_id("MS001C1").click
-            messages = driver.find_elements(By.NAME, "MessageEditorText")
-            for index, message in enumerate(messages):  # For each line
-                if toggle_break(message, clock, breaks[index]):  # Check if a break is on
-                    inactives[index] += 1  # Increase the minutes passed for the current line
+            find_by(driver, "name", "B004", 1)
+            find_by(driver, "id", "MS000C1", 1)
+            find_by(driver, "id", "MS001C1", 1)
+            messages = find_by(driver, "id", "MessageEditorText")
+            for index in line_num:  # For each line
                 update(message, clock, locations[index], breaks[index])  # Where time and qty get changed
+                if toggle_break(clock, breaks[index]):  # Check if a break is on
+                    inactives[index] += 1  # Increase the minutes passed for the current line
 
             for index in range(line_num):
                 # Go through the boards again to check their inactivity time,
@@ -197,10 +193,9 @@ def update_board(driver, remote, config):
                 # alongside the inactivity checking causes an error
                 check_txt_color(index, locations, previous_values, red_markers, inactives)
 
-            time.sleep(1)
-            driver.find_element_by_name("Save").click
-            driver.find_element_by_id("MS000C1").click
-            driver.find_element_by_name("Main").click
+            find_by(driver, "name", "Save", 1)
+            find_by(driver, "id", "MS000C1", 1)
+            find_by(driver, "name", "Main", 1)
         elif current_second == "30":  # Halfway through every minute
             # "Reset" the board window session time
             time.sleep(1)
@@ -208,17 +203,22 @@ def update_board(driver, remote, config):
             # click the logout button freezes the program
             auto.click(auto.locateOnScreen("Logout.png"))
             time.sleep(1)
-            auto.click(auto.locateOnScreen("Login.png"))
+            auto.keyDown("ctrl")  # Refresh the page
+            auto.press("r")
+            auto.keyUp("ctrl")
             login()
-            driver.find_element_by_name("Main").click
 
 def setup_message(driver, remote, config):
     """Use 'create new msg' to print the initial message."""
     def write_message():
         """Put the correct information in the text boxes."""
+        temp = driver.find_element_by_xpath("//* [contains( text(),' of ')]")  # Get # of #
+        for f in int(temp.text.split()[-1])-1:  # Delete all previous pages
+            find_by(driver, "id", "MS4001C1", 1)
         for j in range(line_num-1):  # Add a page for each line
-            driver.find_element_by_name("AddPage").click
-        messages = driver.find_elements(By.NAME, "MessageEditorText")
+            find_by(driver, "id", "MS4000C1", 1)
+            time.sleep(4.5)
+        messages = find_by(driver, "id", "MessageEditorText")
         for index, message in enumerate(messages):
             section = config.sections()[0]  # Workcenter section
             location = config.items(section)[index][1]  # Get the corresponding value in the file
@@ -240,26 +240,25 @@ def setup_message(driver, remote, config):
                 message.send_keys(quota)
 
     # Navigate to create new message
-    driver.find_element_by_name("B004").click
-    for do_twice in range(2):
-        driver.find_element_by_id("MS000C1").click
+    find_by(driver, "id", "MS4001C1", 1)
+    time.sleep(5)
+    find_by(driver, "id", "MS4003C1", 1)
+    find_by(driver, "id", "MS1001C1", 1)
 
     write_message()
-    for panel_num in range(line_num):
-        change_color(driver, panel_num, "Green")
-        change_align(driver, panel_num)
+    for panel_num in range(line_num):  # Change alignment
+        find_by(driver, "id", "MS9001C1", 1)
 
-    driver.find_element_by_name("Save").click
-    driver.find_element_by_id("MS000C1").click
-    driver.find_element_by_name("Main").click
+    find_by(driver, "id", "MS12000C1", 1)  # Save message
+    find_by(driver, "id", "MS1000C1", 1)  # Activate message
 
 def setup_plex(remote):
     """Get plex ready for use."""
-    remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx?")
-    remote.find_element_by_name("txtUserID").send_keys("w.Andre.Le")
-    remote.find_element_by_name("txtPassword").send_keys("FmSb234_po")  #OokyOoki2  #dArk48_kF
-    remote.find_element_by_name("txtCompanyCode").send_keys("wanco")
-    remote.find_element_by_id("btnLogin").click()
+    remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx")
+    find_by(remote, "name", "txtUserID").send_keys("w.Andre.Le")
+    find_by(remote, "name", "txtPassword").send_keys("FmSb234_po")  #OokyOoki2  #dArk48_kF
+    find_by(remote, "name", "txtCompanyCode").send_keys("wanco")
+    find_by(remote, "id", "btnLogin", 1)
     remote.switch_to.window(remote.window_handles[1])
     # Navigate to Production History
     action = ActionChains(remote)
@@ -282,9 +281,13 @@ def setup_board(driver):
         # Going to frame enables access to the rest of the html
     except:  # If the program restarts itself, it doesn't need to do the above again
         pass
-    try:  # If a Main button exists, click it to go back to the main menu
-        driver.find_element_by_name("Main").click
-    except:  # If not, the page is already on the main menu and ready to begin
+    try:  # If left on Quick Message
+        find_by(driver, "id", "MS3001C1", 1)
+    except:  # If not, the site is either on the main page or elsewhere
+        pass
+    try:  # If left on Message Edit
+        find_by(driver, "id", "MS12002C1", 1)
+    except:  # If not, the site is on the main page
         pass
 
 def main(driver, remote, config):
@@ -295,22 +298,14 @@ def main(driver, remote, config):
     setup_message(driver, remote, config)
     time.sleep(5)
     update_board(driver, remote, config)
-    # The below executes at the end
-    finished = False
-    while not finished:
-        try:
-            driver.find_element_by_name("Main").click
-            finished = True
-            break
-        except:
-            driver.find_element_by_name("B000").click
 
 PATH = "chromedriver.exe"  # Put chromedriver.exe into the same directory
 config = ConfigParser()
 if config.read('KPIt.ini'):
     print("KPIt.ini file successfully read in")
-    lines = config.sections()[0]
-    line_num = len(config.items(lines))
+    lines = config.items(config.sections()[0])
+    printing_lines = config.items(config.sections()[1])
+    line_num = len(lines)
 else:
     print("Couldn't read in KPIt.ini, make sure it's in the same directory")
     exit()
@@ -319,10 +314,8 @@ restart = True
 while restart:  # The program will restart itself if an error occurs
     try:
         remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
-        remote.implicitly_wait(10)
         # That way, the webdriver for the message board will be the active window
         driver = webdriver.Chrome(PATH)
-        driver.implicitly_wait(10)
         main(driver, remote, config)
         restart = False
     except Exception as e:
