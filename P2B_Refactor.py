@@ -67,20 +67,16 @@ def login():
 def update_board(driver, remote, config):
     """Will update the time and total on the board."""
     # Inner functions
-    def update(message, clock, location, break_time):
+    def update(message, clock, location, break_time, inact_count):
         """Where all the writing happens for one panel."""
-        for go in range(21):  # Move the cursor to the top left of the box
-            message.send_keys(Keys.ARROW_LEFT)
-        message.send_keys(Keys.ARROW_DOWN)
-        message.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
-        if break_time[0] == True:  # If on break, go left pass the asterik
-            message.send_keys(Keys.ARROW_LEFT)
-        for go in range(5):  # Clear everything on this line
-            message.send_keys(Keys.BACKSPACE)  # 5 times because longest case could be "12:00"
         message.send_keys(clock)
+        if break_time[0] == True:  # Depending if on break or not
+            inact_count += 1  # Increase the minutes passed for the current line
+        message.send_keys(Keys.RETURN)  # Onto next line
 
-        for go in range(3):  # Go one line beyond the last line
-            message.send_keys(Keys.ARROW_DOWN)
+        message.send_keys(printing_lines[index][1])  # The shortened line name
+        message.send_keys(Keys.RETURN)  # Onto next line
+
         all_lines = message.text.split()
         if "/" in all_lines[2]:  # Check for quota
             for go in range(3):  # Go to just after the current total if the quota is one digit
@@ -130,13 +126,8 @@ def update_board(driver, remote, config):
     def toggle_break(page, curr_time, line_break):
         """Signify that a line is on break."""
         if curr_time == line_break[-1]:  # If time for a break toggle
-            for go in range(21):  # Move the cursor to the top left of the box
-                page.send_keys(Keys.ARROW_LEFT)
-            page.send_keys(Keys.ARROW_DOWN)
-            page.send_keys(Keys.ARROW_LEFT)  # Maneuver to the right side of the first line
             line_break.pop()  # Remove the last element since that time has now passed
             if line_break[0] == True:  # Turn break off
-                page.send_keys(Keys.BACKSPACE)  # Remove the '*'
                 line_break[0] = False  # Mark this line as not on break
             else:  # Turn break on
                 page.send_keys("*")  # Add an '*' to sigify a break
@@ -153,7 +144,7 @@ def update_board(driver, remote, config):
     red_markers = [False] * line_num  # Keeps track of which lines are red
     section = config.sections()[4]  # Breaks section
     breaks = []
-    for index, line in enumerate(config.items(lines)):  # Get the break times for lines
+    for index, line in enumerate(line):  # Get the break times for lines
         breaks.append([])  # Add a list for a line
         for _time_ in (line[1].split(',')):  # Iterating over a list of break periods
             if '-' not in _time_:  # If the Breaks section contains errors
@@ -185,7 +176,7 @@ def update_board(driver, remote, config):
             find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
-                update(message, clock, locations[index], breaks[index])
+                update(message, clock, locations[index], breaks[index], inactives[index])
 
             for index in range(line_num):
                 # Go through the boards again to check their inactivity time,
