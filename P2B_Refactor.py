@@ -217,18 +217,15 @@ def setup_message(driver, remote, config):
             find_by(driver, "id", "MS4001C1", 1)
         for j in range(line_num-1):  # Add a page for each line
             find_by(driver, "id", "MS4000C1", 1)
-            time.sleep(4.5)
-        messages = find_by(driver, "id", "MessageEditorText")
-        for index, message in enumerate(messages):
-            section = config.sections()[0]  # Workcenter section
-            location = config.items(section)[index][1]  # Get the corresponding value in the file
+        for index in line_num:
+            message = find_by(driver, "id", "MessageEditorText")
+            location = lines[index][1]  # Get the corresponding value in the file
             total = get_qty(remote, location)
 
             message.send_keys(get_time())
             message.send_keys(Keys.RETURN)
 
-            section = config.sections()[1]  # PrintingName section
-            trunc_loc = config.items(section)[index][1]
+            trunc_loc = printing_lines[index][1]  # Printing lines
             message.send_keys(trunc_loc)
             message.send_keys(Keys.RETURN)
             message.send_keys(total)  # Fill in with value from Plex
@@ -239,15 +236,15 @@ def setup_message(driver, remote, config):
                 message.send_keys("/")
                 message.send_keys(quota)
 
+            find_by(driver, "id", "MS9001C1", 1)  # Change alignment
+
     # Navigate to create new message
-    find_by(driver, "id", "MS4001C1", 1)
+    find_by(driver, "id", "MS4001C1", 1)  # Blank the board
     time.sleep(5)
-    find_by(driver, "id", "MS4003C1", 1)
-    find_by(driver, "id", "MS1001C1", 1)
+    find_by(driver, "id", "MS4003C1", 1)  # Quick Message
+    find_by(driver, "id", "MS1001C1", 1)  # Create new message
 
     write_message()
-    for panel_num in range(line_num):  # Change alignment
-        find_by(driver, "id", "MS9001C1", 1)
 
     find_by(driver, "id", "MS12000C1", 1)  # Save message
     find_by(driver, "id", "MS1000C1", 1)  # Activate message
