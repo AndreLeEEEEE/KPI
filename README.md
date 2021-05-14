@@ -74,7 +74,7 @@ the user must switch between the MBw and Pw a couple of times. First, the MBw mu
 login. Second, the Pw must be in front to allow production history to be selected (this comes after Mbw is logged in).
 Last, switch MBw back to the front for the rest of the program's operation.
 
-Update 4/40/2021: A new DCU board was hooked up to my computer, so I'm no longer using the old board. This is a huge change,
+Update 4/30/2021: A new DCU board was hooked up to my computer, so I'm no longer using the old board. This is a huge change,
 because now I have to refactor almost all of the code that's associated with the board. Functionality wise, the new board
 can do everything the old one could. However, the new web broswer interface doesn't have an option to change text color.
 That option is only available on the touchpad. Other differences are minor. First, creating a new message doesn't overwrite
