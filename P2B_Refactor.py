@@ -13,6 +13,12 @@ from configparser import ConfigParser  # Needed to read in from .ini files
 
 def find_by(web_driver, attribute, value, click = 0):
     """Interacts with an element by attribute."""
+    """
+    web_driver - selenium webdriver, any driver
+    attribute - string, HTML element
+    value - string, HTML element value
+    click - integer, signify if element has to be clicked, default is no
+    """
     e_wait = WebDriverWait(web_driver, 10)  # Set explicit wait
     if attribute == "name":
         element = e_wait.until(
@@ -28,6 +34,10 @@ def find_by(web_driver, attribute, value, click = 0):
 
 def get_qty(web_driver, location):
     """Returns the current total dropped by one line."""
+    """
+    web_driver - selenium webdriver, the plex driver
+    location - string, full location name for search criteria
+    """
     input_box = find_by(web_driver, "id", "flttxtWorkcenter")
     input_box.clear()
     input_box.send_keys(location)
@@ -66,65 +76,70 @@ def login():
 
 def update_board(driver, remote, config):
     """Will update the time and total on the board."""
+    """
+    driver - selenium webdriver, message board driver
+    remote - selenium webdriver, plex driver
+    config - config file, holds KPI.ini
+    """
     # Inner functions
-    def update(message, clock, location, break_time, inact_count):
+    def update(index, message, clock, location, break_time, inact_count, p_values):
         """Where all the writing happens for one panel."""
+        """
+        index - integer, current page index
+        message - selenium element, message box
+        clock - string, current time
+        location - string, name of line to use
+        break-time - list of bool and str, break status and times for line
+        inact_count - list of int, inactivity for line
+        p_values - list of str, the line's qty before the current one
+        """
         message.send_keys(clock)
-        if break_time[0] == True:  # Depending if on break or not
-            inact_count += 1  # Increase the minutes passed for the current line
-        message.send_keys(Keys.RETURN)  # Onto next line
+        if toggle_break(message, clock, break_time) == False:  # Check if a break is on or off
+                inact_count[index] += 1  # Increase the minutes passed for the current line
+        message.send_keys(Keys.RETURN)  # Onto next text line
 
         message.send_keys(printing_lines[index][1])  # The shortened line name
-        message.send_keys(Keys.RETURN)  # Onto next line
+        message.send_keys(Keys.RETURN)  # Onto next text line
 
-        all_lines = message.text.split()
-        if "/" in all_lines[2]:  # Check for quota
-            for go in range(3):  # Go to just after the current total if the quota is one digit
-                message.send_keys(Keys.ARROW_LEFT)
-            temp = all_lines[2].split('/')
-            if len(temp[1]) == 2: # If the quota is two digits
-                message.send_keys(Keys.ARROW_LEFT)  # Go left one more time
-            temp = temp[0]  # Get total
-        else:
-            message.send_keys(Keys.ARROW_LEFT)  # Go left once to reach end of total
-            temp = all_lines[2]  # Get total
+        temp_qty = get_qty(remote, location)
+        message.send_keys(temp_qty)
+        section = config.sections()[2]  # Goal section
+        quota = config.items(section)[index][1]
+        if int(quota) != 0:
+            message.send_keys('/' + quota)
 
-        if len(temp) == 2:  # If the current total has two digits
-            message.send_keys(Keys.BACKSPACE)  # Backspace one more time
-        message.send_keys(Keys.BACKSPACE)  # Always backspace at least once
-        message.send_keys(get_qty(remote, location))
+        toggle_inactive(index, message, p_values, temp_qty, inact_count)
+        find_by(driver, "id", "MS9001C1", 1)  # Change alignment, auto submits
 
-        if toggle_break(clock, breaks[index]):  # Check if a break is on
-                    inactives[index] += 1  # Increase the minutes passed for the current line
-
-    def check_txt_color(index, locations, prev_val, red_mark, inact):
+    def toggle_inactive(index, page, prev_qty, cur_qty, inact):
         """Change the text color of a line when necessary."""
-        num_drop = get_qty(remote, locations[index])  # A string variable
-        quota = config.sections()[2]  # Goal section
-        quota = config.items(quota)[index][1]  # A string variable
-        if int(num_drop) >= int(quota) and int(quota) != 0:
-            # If the quota exists and has been met
-            change_color(driver, index, "Blue")
-        elif num_drop == prev_val[index]:
-            # If the current qty equals the previous qty
-            inactivity = config.sections()[3]  # Inactivity section
-            time_limit = config.items(inactivity)[index][1]  # In minutes
-            if time_limit == "x":  # There is no time limit
-                return  # Exit this iteration
-            if (inact[index] >= int(time_limit)) and (red_mark[index] == False):
-            # If the time passed without a new drop equals or exceeds the line's time limit
-            # and the font is red
-                change_color(driver, index, "Red")
-                red_mark[index] = True
+        """
+        index - integer, current page index
+        page - selenium element, message box
+        prev_qty - list of str, the line's qty before the current one
+        cur_qty - string, the line's current qty
+        inact - list of int, inactivity for line
+        """
+        inactivity = config.sections()[3]  # Inactivity section
+        time_limit = config.items(inactivity)[index][1]  # In minutes
+        if time_limit == "x":  # There is no time limit
+            return  # Exit this function
         else:
-            if red_mark[index] == True:  # if the text is red
-                change_color(driver, index, "Green")  # Revert back
-                red_mark[index] = False
-            inact[index] = 0  # Reset counter
-            prev_val[index] = num_drop  # Update previous value
+            if cur_qty == prev_qty[index]:  # If the current qty equals the previous qty
+                if inact[index] >= int(time_limit):
+                    # This needs to occur if the qty's are equal and time_limit is met
+                    page.send_keys("?")
+            else:
+                inact[index] = 0  # Reset counter
+                prev_val[index] = num_drop  # Update previous value
 
     def toggle_break(page, curr_time, line_break):
         """Signify that a line is on break."""
+        """
+        page - selenium element, message box
+        curr_time - string, current time
+        line_break - list, break status and times for line
+        """
         if curr_time == line_break[-1]:  # If time for a break toggle
             line_break.pop()  # Remove the last element since that time has now passed
             if line_break[0] == True:  # Turn break off
@@ -133,15 +148,12 @@ def update_board(driver, remote, config):
                 page.send_keys("*")  # Add an '*' to sigify a break
                 line_break[0] = True  # Mark this line as on break
         # On break, don't increment inactivity. Not on break, increment inactivity
-        return False if line_break[0] == True else True
+        return True if line_break[0] == True else False
 
     # Variables
-    locations = []  # Store the locations for many uses later
     previous_values = []  # Store the previous qty's
     for line in lines:  # Get the corresponding value in the file
-        locations.append(line[1])  # Get line name
         previous_values.append(get_qty(remote, line[1]))  # Initial qty's for comparison
-    red_markers = [False] * line_num  # Keeps track of which lines are red
     section = config.sections()[4]  # Breaks section
     breaks = []
     for index, line in enumerate(line):  # Get the break times for lines
@@ -176,17 +188,15 @@ def update_board(driver, remote, config):
             find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
-                update(message, clock, locations[index], breaks[index], inactives[index])
+                # Passing an integer, selenium element, string, list, list, list
+                # inactives and previous_values are passed as lists since
+                # changes made to them need to stick
+                update(index, message, clock, lines[index], breaks[index], inactives, previous_values)
+                if line_num - index != 1:
+                    find_by(driver, "id", "MS3001C1", 1)  # Go to next page
 
-            for index in range(line_num):
-                # Go through the boards again to check their inactivity time,
-                # because apparently trying to perform the standard update 
-                # alongside the inactivity checking causes an error
-                check_txt_color(index, locations, previous_values, red_markers, inactives)
-
-            find_by(driver, "name", "Save", 1)
-            find_by(driver, "id", "MS000C1", 1)
-            find_by(driver, "name", "Main", 1)
+            find_by(driver, "id", "MS12000C1", 1)  # Save button
+            find_by(driver, "id", "MS1000C1", 1)  # Activate message button
         elif current_second == "30":  # Halfway through every minute
             # "Reset" the board window session time
             time.sleep(1)
@@ -201,10 +211,15 @@ def update_board(driver, remote, config):
 
 def setup_message(driver, remote, config):
     """Use 'create new msg' to print the initial message."""
+    """
+    driver - selenium webdriver, message board driver
+    remote - selenium webdriver, plex driver
+    config - config file, holds KPI.ini
+    """
     def write_message():
         """Put the correct information in the text boxes."""
         temp = driver.find_element_by_xpath("//* [contains( text(),' of ')]")  # Get # of #
-        for f in int(temp.text.split()[-1])-1:  # Delete all previous pages
+        for f in int(temp.text.split()[-1]):  # Delete all previous pages
             find_by(driver, "id", "MS4001C1", 1)
         for index in range(line_num):
             message = find_by(driver, "id", "MessageEditorText")
@@ -225,11 +240,10 @@ def setup_message(driver, remote, config):
                 message.send_keys("/")
                 message.send_keys(quota)
 
-            find_by(driver, "id", "MS9001C1", 1)  # Change alignment
-            find_by(driver, "name", "Submit", 1)  # Confirm changes for this page
+            find_by(driver, "id", "MS9001C1", 1)  # Change alignment, auto submits
             # Add a new page, the interface automatically goes to it
-            # Unless this is the last page
-            if line_num - index == 1:
+            # Unless this is the last page, then don't add new page
+            if line_num - index != 1:
                 find_by(driver, "id", "MS4000C1", 1)
 
     # Navigate to create new message
@@ -245,6 +259,9 @@ def setup_message(driver, remote, config):
 
 def setup_plex(remote):
     """Get plex ready for use."""
+    """
+    remote - selenium webdriver, plex driver
+    """
     remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx")
     find_by(remote, "name", "txtUserID").send_keys("w.Andre.Le")
     find_by(remote, "name", "txtPassword").send_keys("FmSb234_po")  #OokyOoki2  #dArk48_kF
@@ -264,6 +281,9 @@ def setup_plex(remote):
 
 def setup_board(driver):
     """Get the board ready for use."""
+    """
+    driver - selenium webdriver, message board driver
+    """
     driver.get("http://192.168.13.100:82/")  # Open the IP address
     login()
     try:  # 90% of the html are nested within frames, specifically the second frame
@@ -282,6 +302,12 @@ def setup_board(driver):
         pass
 
 def main(driver, remote, config):
+    """Start everything"""
+    """
+    driver - selenium webdriver, message board driver
+    remote - selenium webdriver, plex driver
+    config - config file, holds KPI.ini
+    """
     setup_board(driver)
     setup_plex(remote)
 
@@ -314,4 +340,4 @@ while restart:  # The program will restart itself if an error occurs
         print("Restarting program")
     finally:
         remote.quit()  # It's very important that quit is called on both drivers
-        driver.quit()  # This will ensure the error producing webdriver sessions no longer occupy memory
+        driver.quit()  # This will ensure the webdriver sessions no longer occupy memory
