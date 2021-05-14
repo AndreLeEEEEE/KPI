@@ -216,17 +216,20 @@ def setup_message(driver, remote, config):
     remote - selenium webdriver, plex driver
     config - config file, holds KPI.ini
     """
-    def write_message():
+    def write_message(clock):
         """Put the correct information in the text boxes."""
+        """
+        clock - string, the current time
+        """
         temp = driver.find_element_by_xpath("//* [contains( text(),' of ')]")  # Get # of #
-        for f in int(temp.text.split()[-1]):  # Delete all previous pages
-            find_by(driver, "id", "MS4001C1", 1)
+        for f in range(int(temp.text.split()[-1])):  # Delete all previous pages
+            find_by(driver, "id", "MS4001C1", 1)  # The delete button
         for index in range(line_num):
             message = find_by(driver, "id", "MessageEditorText")
             location = lines[index][1]  # Get the corresponding value in the file
             total = get_qty(remote, location)
 
-            message.send_keys(get_time())
+            message.send_keys(clock)
             message.send_keys(Keys.RETURN)
 
             trunc_loc = printing_lines[index][1]  # Printing lines
@@ -251,8 +254,9 @@ def setup_message(driver, remote, config):
     time.sleep(5)
     find_by(driver, "id", "MS4003C1", 1)  # Quick Message
     find_by(driver, "id", "MS1001C1", 1)  # Create new message
-
-    write_message()
+    # The current time has to be calculated and passed now since it
+    # can update between iterations in the function
+    write_message(get_time())
 
     find_by(driver, "id", "MS12000C1", 1)  # Save message
     find_by(driver, "id", "MS1000C1", 1)  # Activate message
@@ -264,7 +268,7 @@ def setup_plex(remote):
     """
     remote.get("https://www.plexonline.com/modules/systemadministration/login/index.aspx")
     find_by(remote, "name", "txtUserID").send_keys("w.Andre.Le")
-    find_by(remote, "name", "txtPassword").send_keys("FmSb234_po")  #OokyOoki2  #dArk48_kF
+    find_by(remote, "name", "txtPassword").send_keys("FmSb234_po")
     find_by(remote, "name", "txtCompanyCode").send_keys("wanco")
     find_by(remote, "id", "btnLogin", 1)
     remote.switch_to.window(remote.window_handles[1])
