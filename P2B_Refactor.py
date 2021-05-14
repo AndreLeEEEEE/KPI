@@ -101,28 +101,30 @@ def update_board(driver, remote, config):
         message.send_keys(printing_lines[index][1])  # The shortened line name
         message.send_keys(Keys.RETURN)  # Onto next text line
 
-        temp_qty = get_qty(remote, location)
+        temp_qty = get_qty(remote, location[1])
         message.send_keys(temp_qty)
         section = config.sections()[2]  # Goal section
         quota = config.items(section)[index][1]
         if int(quota) != 0:
             message.send_keys('/' + quota)
 
-        toggle_inactive(index, message, p_values, temp_qty, inact_count)
+        toggle_inactive(index, message, p_values, temp_qty, quota, inact_count)
         find_by(driver, "id", "MS9001C1", 1)  # Change alignment, auto submits
 
-    def toggle_inactive(index, page, prev_qty, cur_qty, inact):
+    def toggle_inactive(index, page, prev_qty, cur_qty, quo, inact):
         """Change the text color of a line when necessary."""
         """
         index - integer, current page index
         page - selenium element, message box
         prev_qty - list of str, the line's qty before the current one
         cur_qty - string, the line's current qty
+        quo - string, the line's quota
         inact - list of int, inactivity for line
         """
         inactivity = config.sections()[3]  # Inactivity section
         time_limit = config.items(inactivity)[index][1]  # In minutes
-        if time_limit == "x":  # There is no time limit
+        if (time_limit == "x") or (int(cur_qty) >= int(quo)):
+            # If there's no time limit or quota was achieved
             return  # Exit this function
         else:
             if cur_qty == prev_qty[index]:  # If the current qty equals the previous qty
@@ -156,7 +158,8 @@ def update_board(driver, remote, config):
         previous_values.append(get_qty(remote, line[1]))  # Initial qty's for comparison
     section = config.sections()[4]  # Breaks section
     breaks = []
-    for index, line in enumerate(line):  # Get the break times for lines
+    temp_b = config.items(config.sections()[4])  # Get the breaks
+    for index, line in enumerate(temp_b):  # Get the break times for lines
         breaks.append([])  # Add a list for a line
         for _time_ in (line[1].split(',')):  # Iterating over a list of break periods
             if '-' not in _time_:  # If the Breaks section contains errors
