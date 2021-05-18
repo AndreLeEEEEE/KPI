@@ -92,10 +92,12 @@ the old message in the editor, so I have to manually flush that out everytime th
 supposed to blank the board when it ends properly, but this could be a problem if the program restarts and the old message
 persists. Second, clicking options has a longer average wait time. Third, alignment changing is now per page instead of per
 line. Fourth, speaking of pages, they're all on separate web pages so no more editing all of them at once. Fifth, when
-modifying a page, I have to rewrite everything now since the current message isn't in text form after activation. Last,
+modifying a page, I have to rewrite everything now since the current message isn't in text form after activation. Sixth,
 most of the "find element and click" statements are now nonapplicable since every button has a dot label instead of their
 advertised option. This means that every "main" button has different id's and name's and saying "find and click" the "main"
-button no longer works.
+button no longer works. Last, the web interface is noticeably slower than the old interface. Clicking a button may induce
+a slight lag/delay in the executed action. This isn't enough to stop the program or break it, but board set up and updating,
+on average, takes a bit longer. 
 
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
