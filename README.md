@@ -1,6 +1,16 @@
 # KPI
 This python script automatically updates a message board with values from Plex using automation, not an API (Unfortunately).
 KPI stands for Key Performance Indicator.
+There are two main automation modules/libraries in this program: selenium and pyautogui.
+Selenium makes up the bulk of the automation. It can only operate on web brower pages that utilize HTML as it navigates
+by HTML elements. Selenium works in the background so a user could still use the computer for other tasks while selenium
+is running. However, this is negated by pyautogui. There are some parts of the overall procedure that selenium cannot 
+perform as it cannot use HTML to access it. Pyautogui works by emulating human actions such a raw key presses and mouse
+clicks. The drawback is that pyautogui performs these actions as if another human is using the computer. The cursor will
+move by itself when something is clicked on. Whatever the program is interacting with does have to be in the forefront
+of the screen. Since this program uses pyautogui for mouse clicks every minute, whichever computer is used to execute 
+this script cannot by used for anything else at running time. Usage during running time will most likely disrupt the
+program.
 
 Versions of python and installed modules:
 - python 3.7.8
