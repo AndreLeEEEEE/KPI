@@ -147,8 +147,9 @@ def update_board(driver, remote, config):
             if line_break[0] == True:  # Turn break off
                 line_break[0] = False  # Mark this line as not on break
             else:  # Turn break on
-                page.send_keys("*")  # Add an '*' to sigify a break
                 line_break[0] = True  # Mark this line as on break
+        if line_break[0] == True:
+            page.send_keys("*")  # Add an '*' to sigify a break
         # On break, don't increment inactivity. Not on break, increment inactivity
         return True if line_break[0] == True else False
 
