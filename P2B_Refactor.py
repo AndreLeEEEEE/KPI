@@ -88,7 +88,7 @@ def update_board(driver, remote, config):
         index - integer, current page index
         message - selenium element, message box
         clock - string, current time
-        location - string, name of line to use
+        location - list of str, name of line to use
         break-time - list of bool and str, break status and times for line
         inact_count - list of int, inactivity for line
         p_values - list of str, the line's qty before the current one
@@ -133,7 +133,7 @@ def update_board(driver, remote, config):
                     page.send_keys("?")
             else:
                 inact[index] = 0  # Reset counter
-                prev_val[index] = num_drop  # Update previous value
+                prev_qty[index] = cur_qty  # Update previous value
 
     def toggle_break(page, curr_time, line_break):
         """Signify that a line is on break."""
@@ -148,9 +148,11 @@ def update_board(driver, remote, config):
                 line_break[0] = False  # Mark this line as not on break
             else:  # Turn break on
                 line_break[0] = True  # Mark this line as on break
+
         if line_break[0] == True:
             page.send_keys("*")  # Add an '*' to sigify a break
         # On break, don't increment inactivity. Not on break, increment inactivity
+
         return True if line_break[0] == True else False
 
     # Variables
@@ -186,13 +188,14 @@ def update_board(driver, remote, config):
             clock = get_time()
             if clock == "4:30":  # Stop updating at the end of the day
                 exit_condition = True
-                break
+                find_by(driver, "id", "MS4001C1", 1)  # Blank the board when done
+                continue
 
             find_by(driver, "id", "MS4003C1", 1)  # Quick Message
             find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
-                # Passing an integer, selenium element, string, list, list, list
+                # Passing an integer, selenium element, string, list, list, list, list
                 # inactives and previous_values are passed as lists since
                 # changes made to them need to stick
                 update(index, message, clock, lines[index], breaks[index], inactives, previous_values)
@@ -203,7 +206,6 @@ def update_board(driver, remote, config):
             find_by(driver, "id", "MS1000C1", 1)  # Activate message button
         elif current_second == "30":  # Halfway through every minute
             # "Reset" the board window session time
-            time.sleep(1)
             # locateOnScreen function needed as using selenium to 
             # click the logout button freezes the program
             auto.click(auto.locateOnScreen("Logout.png"))
@@ -211,6 +213,7 @@ def update_board(driver, remote, config):
             auto.keyDown("ctrl")  # Refresh the page
             auto.press("r")
             auto.keyUp("ctrl")
+            time.sleep(1)
             login()
 
 def setup_message(driver, remote, config):
