@@ -111,6 +111,14 @@ left in the ini file. This means break period are inversed as the program will r
 time. Testing the program is still underway, but time out errors will be attributed to the shaky web interface connection 
 if the page is down.
 
+5/20/2021: I was wrong about the new interface's delays not affecting the program. They do. During a few tests today, some
+time out errors were caused by connection lost. However, others were caused by failures to to find HTML elements on the 
+interface. I've added a few manual time.sleep()'s into the program, specifically the find_by function and the re-login
+section. Next, I've made  overhauls to the inactive counters and the break toggling. The counters and break boolean
+statuses are now global variables. This way, their values are maintained in the event of a restart. The toggle break
+function also works a bit differently to account for restarts since restarting brings back all the pasted break times.
+Now, pasted times are prematurely popped from the list, up until the times yet to come.
+
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
 two webdrivers, driver and remote, that will utilize google chrome. Main() is called while driver and remote are being passed, too.
