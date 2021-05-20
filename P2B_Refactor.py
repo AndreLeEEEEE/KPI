@@ -82,7 +82,7 @@ def update_board(driver, remote, config):
     config - config file, holds KPI.ini
     """
     # Inner functions
-    def update(index, message, clock, location, break_time, inact_count, p_values):
+    def update(index, message, clock, location, break_time, p_values):
         """Where all the writing happens for one panel."""
         """
         index - integer, current page index
@@ -90,12 +90,11 @@ def update_board(driver, remote, config):
         clock - string, current time
         location - list of str, name of line to use
         break-time - list of bool and str, break status and times for line
-        inact_count - list of int, inactivity for line
         p_values - list of str, the line's qty before the current one
         """
         message.send_keys(clock)
-        if toggle_break(message, clock, break_time) == False:  # Check if a break is on or off
-                inact_count[index] += 1  # Increase the minutes passed for the current line
+        if toggle_break(index, message, clock, break_time) == False:  # Check if a break is on or off
+                inactives[index] += 1  # Increase the minutes passed for the current line
         message.send_keys(Keys.RETURN)  # Onto next text line
 
         message.send_keys(printing_lines[index][1])  # The shortened line name
@@ -108,10 +107,10 @@ def update_board(driver, remote, config):
         if int(quota) != 0:
             message.send_keys('/' + quota)
 
-        toggle_inactive(index, message, p_values, temp_qty, quota, inact_count)
+        toggle_inactive(index, message, p_values, temp_qty, quota)
         find_by(driver, "id", "MS9001C1", 1)  # Change alignment, auto submits
 
-    def toggle_inactive(index, page, prev_qty, cur_qty, quo, inact):
+    def toggle_inactive(index, page, prev_qty, cur_qty, quo):
         """Change the text color of a line when necessary."""
         """
         index - integer, current page index
@@ -119,7 +118,6 @@ def update_board(driver, remote, config):
         prev_qty - list of str, the line's qty before the current one
         cur_qty - string, the line's current qty
         quo - string, the line's quota
-        inact - list of int, inactivity for line
         """
         inactivity = config.sections()[3]  # Inactivity section
         time_limit = config.items(inactivity)[index][1]  # In minutes
@@ -127,30 +125,28 @@ def update_board(driver, remote, config):
             # If there's no time limit or quota was achieved
             return  # Exit this function
         else:
-            if cur_qty == prev_qty[index]:  # If the current qty equals the previous qty
-                if inact[index] >= int(time_limit):
-                    # This needs to occur if the qty's are equal and time_limit is met
-                    page.send_keys("?")
+            if (cur_qty == prev_qty[index]) and (inactives[index] >= int(time_limit)):
+                page.send_keys("?")
             else:
-                inact[index] = 0  # Reset counter
+                inactives[index] = 0  # Reset counter
                 prev_qty[index] = cur_qty  # Update previous value
 
-    def toggle_break(page, curr_time, line_break):
+    def toggle_break(index, page, curr_time, line_break):
         """Signify that a line is on break."""
         """
+        index - integer, current page index
         page - selenium element, message box
         curr_time - string, current time
-        line_break - list, break status and times for line
+        line_break - list of bool and str, break status and times for line
         """
         if curr_time == line_break[-1]:  # If time for a break toggle
             line_break.pop()  # Remove the last element since that time has now passed
-            if line_break[0] == True:  # Turn break off
-                line_break[0] = False  # Mark this line as not on break
+            if b_status[index] == True:  # Turn break off
+                b_status[index] = False  # Mark this line as not on break
             else:  # Turn break on
-                line_break[0] = True  # Mark this line as on break
-
-        if line_break[0] == True:
-            page.send_keys("*")  # Add an '*' to sigify a break
+                b_status[index] = True  # Mark this line as on break
+        if b_status[index] == True:
+            page.send_keys("*")  # Add an '*' to signify a break
         # On break, don't increment inactivity. Not on break, increment inactivity
 
         return True if line_break[0] == True else False
@@ -165,7 +161,8 @@ def update_board(driver, remote, config):
     for index, line in enumerate(temp_b):  # Get the break times for lines
         breaks.append([])  # Add a list for a line
         for _time_ in (line[1].split(',')):  # Iterating over a list of break periods
-            if '-' not in _time_:  # If the Breaks section contains errors
+            if ('-' not in _time_):
+                # If the Breaks section contains errors
                 print("Incorrect format for breaks in Breaks section of .ini file")
                 # The program resetting isn't going to fix that, so end it all
                 remote.quit()
@@ -176,8 +173,6 @@ def update_board(driver, remote, config):
         # The list is reversed so the most recent times can be popped off the end
         # without affecting the placement of the boolean marker
         breaks[index] = breaks[index][::-1]
-        breaks[index].insert(0, False)  # Put a False at the beginning
-    inactives = [0] * line_num  # Keep track of minutes passed for each message
     exit_condition = False  # Will be False until the natural end is reached
 
     # The continuous process
@@ -195,10 +190,10 @@ def update_board(driver, remote, config):
             find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
-                # Passing an integer, selenium element, string, list, list, list, list
-                # inactives and previous_values are passed as lists since
-                # changes made to them need to stick
-                update(index, message, clock, lines[index], breaks[index], inactives, previous_values)
+                # Passing an integer, selenium element, string, list, list, list
+                # previous_values is passed as list since
+                # changes made to it need to stick
+                update(index, message, clock, lines[index], breaks[index], previous_values)
                 if line_num - index != 1:
                     find_by(driver, "id", "MS3001C1", 1)  # Go to next page
 
@@ -334,6 +329,9 @@ if config.read('KPIt.ini'):
     lines = config.items(config.sections()[0])
     printing_lines = config.items(config.sections()[1])
     line_num = len(lines)
+    # These variables below are global so they're maintained in case of a restart
+    b_status = [False] * line_num  # Break status for every line
+    inactives = [0] * line_num  # Keep track of minutes passed for each message
 else:
     print("Couldn't read in KPIt.ini, make sure it's in the same directory")
     exit()
