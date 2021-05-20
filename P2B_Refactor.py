@@ -139,17 +139,29 @@ def update_board(driver, remote, config):
         curr_time - string, current time
         line_break - list of bool and str, break status and times for line
         """
-        if curr_time == line_break[-1]:  # If time for a break toggle
-            line_break.pop()  # Remove the last element since that time has now passed
-            if b_status[index] == True:  # Turn break off
-                b_status[index] = False  # Mark this line as not on break
-            else:  # Turn break on
-                b_status[index] = True  # Mark this line as on break
-        if b_status[index] == True:
-            page.send_keys("*")  # Add an '*' to signify a break
-        # On break, don't increment inactivity. Not on break, increment inactivity
+        if line_break:  # If there's something in the list
+            for count, Time in enumerate(line_break[::-1]):
+            # The purpose of this loop is to determine how many break times
+            # have to be popped prematuraly in the case of a restart. When
+            # the latter occurs, all break times are present in line_break.
+            # This is a problem if the restart happened after some times 
+            # were popped since curr_time is compared to the last element.
+                if curr_time <= Time:
+                    break
+            for go in range(count):
+                line_break.pop()
 
-        return True if line_break[0] == True else False
+            if curr_time == line_break[-1]:  # If time for a break toggle
+                line_break.pop()  # Remove the last element since that time has now passed
+                if b_status[index] == True:  # Turn break off
+                    b_status[index] = False  # Mark this line as not on break
+                else:  # Turn break on
+                    b_status[index] = True  # Mark this line as on break
+            if b_status[index] == True:
+                page.send_keys("*")  # Add an '*' to signify a break
+            # On break, don't increment inactivity. Not on break, increment inactivity
+
+        return True if b_status[index] == True else False
 
     # Variables
     previous_values = []  # Store the previous qty's
@@ -173,6 +185,12 @@ def update_board(driver, remote, config):
         # The list is reversed so the most recent times can be popped off the end
         # without affecting the placement of the boolean marker
         breaks[index] = breaks[index][::-1]
+        if len(breaks[index]) % 2 != 0:  # If there's an odd number of times
+            print("Odd number of times in Breaks section of .ini file")
+            # The program resetting isn't going to fix that, so end it all
+            remote.quit()
+            driver.quit()
+            exit()
     exit_condition = False  # Will be False until the natural end is reached
 
     # The continuous process
