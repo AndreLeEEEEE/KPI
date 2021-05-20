@@ -105,8 +105,11 @@ connection to the message board, resulting in a page not found or "empty_respons
 After contecting Richard O'Mally, even he doesn't know what the cause for this is. At this point, we're waiting for a
 response from the software team on how to fix this issue. If left alone, the web interface would induce time out errors
 at random intervals. Although the program can restart itself in the case of general errors, it's preferrable that it
-doesn't do that since that's an indication of unstability. Testing the program is still underway, but time out errors
-will be attributed to the shaky web interface connection if the page is down.
+doesn't do that since that's an indication of unstability. In addition, restarts can screw with the break times if 
+the program happens to restart during a break. When it comes back on, there can be an odd number of readable break times
+left in the ini file. This means break period are inversed as the program will read an "end break" time as a "begin break"
+time. Testing the program is still underway, but time out errors will be attributed to the shaky web interface connection 
+if the page is down.
 
 Setup Phase:
 The script will attempt to locate chromedriver.exe on the computer. Once found, it'll use chromedriver.exe's path and selenium to create 
