@@ -16,14 +16,15 @@ Versions of python and installed modules:
 - python 3.7.8
 - PyAutoGUI 0.9.52
 - selenium 3.141.0
-- ChromeDriver 80.0.3987.106
+- ChromeDriver 90.0.4430.24
 - Visual Studio 16.9.6
-- numpy 1.19.5
+- numpy 1.20.3
 
 Requirements:
 - Plex login for Wanco
 - The correct .ini file (example found in this repository)
 - Ethernet cable connection to an active message board
+- The 'latest' DCU board
 
 Abbreviations:
 Message Board window = MBw,
