@@ -160,3 +160,13 @@ section. Next, I've made  overhauls to the inactive counters and the break toggl
 statuses are now global variables. This way, their values are maintained in the event of a restart. The toggle break
 function also works a bit differently to account for restarts since restarting brings back all the pasted break times.
 Now, pasted times are prematurely popped from the list, up until the times yet to come.
+
+5/21/2021: There's been a reoccurring error in the program. At a random point during the execution, the program will crash
+due to a time out exception. After commenting out the restart mechanic, the exception is said to happen during the update
+function when selenium is trying to find the 'edit previous' button. After trying to increase the amount of time the MBw
+has to make the button visible (this wasn't the issue, the button was already visible) and decorating the find_by function
+with a wrapper that forces it to try again, I couldn't discover the underlying issue. Thus, replaced that one statement with
+action chains. Instead of trying to find the button through its element, the action chain presses the tab key twice before
+then pressing the enter key. The connection drop problem is still present, though perhaps the restart safeguards implemented
+yesterday will serve as sufficient workarounds. Besides the latter, no other problems have shown up and no other known changes
+are imminent. This program could be ready for use on the floor.
