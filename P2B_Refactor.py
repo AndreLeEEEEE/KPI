@@ -204,8 +204,11 @@ def update_board(driver, remote, config):
                 find_by(driver, "id", "MS4001C1", 1)  # Blank the board when done
                 continue
 
+            time.sleep(3)
             find_by(driver, "id", "MS4003C1", 1)  # Quick Message
-            find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
+            time.sleep(3)
+            auto.press(['tab', 'tab', 'enter'])
+            #find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
                 # Passing an integer, selenium element, string, list, list, list
@@ -226,7 +229,7 @@ def update_board(driver, remote, config):
             auto.keyDown("ctrl")  # Refresh the page
             auto.press("r")
             auto.keyUp("ctrl")
-            time.sleep(1)
+            time.sleep(2)
             login()
 
 def setup_message(driver, remote, config):
@@ -273,6 +276,7 @@ def setup_message(driver, remote, config):
     find_by(driver, "id", "MS4001C1", 1)  # Blank the board
     time.sleep(5)
     find_by(driver, "id", "MS4003C1", 1)  # Quick Message
+    time.sleep(3)
     find_by(driver, "id", "MS1001C1", 1)  # Create new message
     # The current time has to be calculated and passed now since it
     # can update between iterations in the function
@@ -310,12 +314,6 @@ def setup_board(driver):
     """
     driver.get("http://192.168.13.100:82/")  # Open the IP address
     login()
-    try:  # 90% of the html are nested within frames, specifically the second frame
-        frames = driver.find_elements_by_tag_name("frame")
-        driver.switch_to.frame(frames[1])
-        # Going to frame enables access to the rest of the html
-    except:  # If the program restarts itself, it doesn't need to do the above again
-        pass
     try:  # If left on Quick Message
         find_by(driver, "id", "MS3001C1", 1)
     except:  # If not, the site is either on the main page or elsewhere
@@ -354,17 +352,17 @@ else:
     print("Couldn't read in KPIt.ini, make sure it's in the same directory")
     exit()
 
-restart = True
-while restart:  # The program will restart itself if an error occurs
-    try:
-        remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
-        # That way, the webdriver for the message board will be the active window
-        driver = webdriver.Chrome(PATH)
-        main(driver, remote, config)
-        restart = False
-    except Exception as e:
-        print("As error has occurred: ", e.__class__)
-        print("Restarting program")
-    finally:
-        remote.quit()  # It's very important that quit is called on both drivers
-        driver.quit()  # This will ensure the webdriver sessions no longer occupy memory
+#restart = True
+#while restart:  # The program will restart itself if an error occurs
+#    try:
+remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
+# That way, the webdriver for the message board will be the active window
+driver = webdriver.Chrome(PATH)
+main(driver, remote, config)
+#        restart = False
+#    except Exception as e:
+#        print("As error has occurred: ", e.__class__)
+#        print("Restarting program")
+#    finally:
+#        remote.quit()  # It's very important that quit is called on both drivers
+#        driver.quit()  # This will ensure the webdriver sessions no longer occupy memory
