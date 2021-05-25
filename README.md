@@ -170,3 +170,9 @@ action chains. Instead of trying to find the button through its element, the act
 then pressing the enter key. The connection drop problem is still present, though perhaps the restart safeguards implemented
 yesterday will serve as sufficient workarounds. Besides the latter, no other problems have shown up and no other known changes
 are imminent. This program could be ready for use on the floor.
+
+5/25/2021: Since 'create new message' and 'edit previous message' are funtionally the same. I changed the 'tab tab enter' with
+a call to find_by that looks for create new message. Maybe this button is less broken than the 'edit prvious message' button.
+Additionally, in an effort to ensure the process is done properly, I implemented find_by's to click on the submit button as
+opposed to relying on the 'change alignment' setting (context: using the 'change alignment' setting would automatically submit
+whatever was in the message box).
