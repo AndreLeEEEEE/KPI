@@ -173,6 +173,11 @@ are imminent. This program could be ready for use on the floor.
 
 5/25/2021: Since 'create new message' and 'edit previous message' are funtionally the same. I changed the 'tab tab enter' with
 a call to find_by that looks for create new message. Maybe this button is less broken than the 'edit prvious message' button.
+However, this proved to be false when the same time out error occurred on the same line. In an attempt to resolve this, I
+replaced the line with a standard find_element_by_xpath. This also resulted in the same error. During some test runs today, I
+was able to see the exact moments the error happened. One of the signs that the error will occur is if the board preview on
+the main menu isn't able to load the text. In fact, a broken image symbol appears. Alongside the connectively drop issue, this
+leads me to believe that this error isn't caused by the code; rather, it's an inherent problem with the web interface. 
 Additionally, in an effort to ensure the process is done properly, I implemented find_by's to click on the submit button as
 opposed to relying on the 'change alignment' setting (context: using the 'change alignment' setting would automatically submit
 whatever was in the message box).
