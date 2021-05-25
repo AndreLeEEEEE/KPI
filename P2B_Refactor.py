@@ -108,7 +108,7 @@ def update_board(driver, remote, config):
             message.send_keys('/' + quota)
 
         toggle_inactive(index, message, p_values, temp_qty, quota)
-        find_by(driver, "id", "MS9001C1", 1)  # Change alignment, auto submits
+        find_by(driver, "name", "Submit", 1)  # Submit changes, alignment already sticks
 
     def toggle_inactive(index, page, prev_qty, cur_qty, quo):
         """Change the text color of a line when necessary."""
@@ -207,8 +207,8 @@ def update_board(driver, remote, config):
             time.sleep(3)
             find_by(driver, "id", "MS4003C1", 1)  # Quick Message
             time.sleep(3)
-            auto.press(['tab', 'tab', 'enter'])
-            #find_by(driver, "id", "MS2001C1", 1)  # Edit Previous
+            #auto.press(['tab', 'tab', 'enter'])
+            find_by(driver, "id", "MS1001C1", 1)  # 'Create new' message
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
                 # Passing an integer, selenium element, string, list, list, list
@@ -266,7 +266,8 @@ def setup_message(driver, remote, config):
                 message.send_keys("/")
                 message.send_keys(quota)
 
-            find_by(driver, "id", "MS9001C1", 1)  # Change alignment, auto submits
+            find_by(driver, "id", "MS9001C1", 1)  # Change alignment
+            find_by(driver, "name", "Submit", 1)
             # Add a new page, the interface automatically goes to it
             # Unless this is the last page, then don't add new page
             if line_num - index != 1:
