@@ -207,8 +207,8 @@ def update_board(driver, remote, config):
             time.sleep(3)
             find_by(driver, "id", "MS4003C1", 1)  # Quick Message
             time.sleep(3)
-            #auto.press(['tab', 'tab', 'enter'])
-            find_by(driver, "id", "MS1001C1", 1)  # 'Create new' message
+            driver.find_element_by_xpath("//*[@id='MS1001C1']").click()
+            #find_by(driver, "id", "MS1001C1", 1)  # 'Create new' message
             for index in range(line_num):  # For each line
                 message = find_by(driver, "id", "MessageEditorText")
                 # Passing an integer, selenium element, string, list, list, list
@@ -353,17 +353,17 @@ else:
     print("Couldn't read in KPIt.ini, make sure it's in the same directory")
     exit()
 
-#restart = True
-#while restart:  # The program will restart itself if an error occurs
-#    try:
-remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
-# That way, the webdriver for the message board will be the active window
-driver = webdriver.Chrome(PATH)
-main(driver, remote, config)
-#        restart = False
-#    except Exception as e:
-#        print("As error has occurred: ", e.__class__)
-#        print("Restarting program")
-#    finally:
-#        remote.quit()  # It's very important that quit is called on both drivers
-#        driver.quit()  # This will ensure the webdriver sessions no longer occupy memory
+restart = True
+while restart:  # The program will restart itself if an error occurs
+    try:
+        remote = webdriver.Chrome(PATH)  # Make the webdriver for plex first
+        # That way, the webdriver for the message board will be the active window
+        driver = webdriver.Chrome(PATH)
+        main(driver, remote, config)
+        restart = False
+    except Exception as e:
+        print("As error has occurred: ", e.__class__)
+        print("Restarting program")
+    finally:
+        remote.quit()  # It's very important that quit is called on both drivers
+        driver.quit()  # This will ensure the webdriver sessions no longer occupy memory
