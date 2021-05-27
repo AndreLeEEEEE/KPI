@@ -333,6 +333,7 @@ def main(driver, remote, config):
     """
     setup_board(driver)
     setup_plex(remote)
+    auto.click(auto.locateOnScreen("BringForward.png"))
 
     time.sleep(2)
     setup_message(driver, remote, config)
