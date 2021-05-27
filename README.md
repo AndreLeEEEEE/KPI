@@ -181,3 +181,7 @@ leads me to believe that this error isn't caused by the code; rather, it's an in
 Additionally, in an effort to ensure the process is done properly, I implemented find_by's to click on the submit button as
 opposed to relying on the 'change alignment' setting (context: using the 'change alignment' setting would automatically submit
 whatever was in the message box).
+
+5/27/2021: After extensive testing of the program today with the restart feature turned on, timeout errors that arise from the
+troublesome line mentioned in the previous updates are no longer a serious problem. Although it's preferrable that the program
+not have to restart mid-operation, this error seems unavaoidable for now. 
