@@ -1,4 +1,5 @@
 # For a 3x4 board
+# Outdated
 
 import pyautogui as auto
 import time
