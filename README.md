@@ -182,6 +182,10 @@ Additionally, in an effort to ensure the process is done properly, I implemented
 opposed to relying on the 'change alignment' setting (context: using the 'change alignment' setting would automatically submit
 whatever was in the message box).
 
-5/27/2021: After extensive testing of the program today with the restart feature turned on, timeout errors that arise from the
+5/27/2021: After extensive testing of the program today with the restart feature turned on, timeout errors that arose from the
 troublesome line mentioned in the previous updates are no longer a serious problem. Although it's preferrable that the program
-not have to restart mid-operation, this error seems unavaoidable for now. 
+not have to restart mid-operation, this error seems unavoidable for now; thus, the restart feature will help get over this.
+This leaves only the connectivity lost error left (at the moment). Another feature implemented is the click to bring the MBw
+forward. Originally, the MB driver is initialized second as logging into that requires pyautogui instead of selenium. After
+the modification that made looking up a specific plex page more universal, the pw will be brought to the foreground. Since the
+previous change is required in case the search results change in order, a way to put the MBw in front was necessary.
