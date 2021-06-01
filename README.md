@@ -190,8 +190,10 @@ forward. Originally, the MB driver is initialized second as logging into that re
 the modification that made looking up a specific plex page more universal, the pw will be brought to the foreground. Since the
 previous change is required in case the search results change in order, a way to put the MBw in front was necessary.
 
-6/1/2021: The color feature of the web interface was added back in. This means the code has to be refactored again to to utilize
+6/1/2021: The color feature of the web interface was added back in. This means the code has to be refactored again to utilize
 color. This will get rid of the ? that gets sent when a line is inactive. Inactive lines will be represented in red once more
 and lines that meet quotas are painted blue. At the moment, the DCU board can be accessed wirelessly over the network, but only
 for a short period of time. There's something odd about the board being on the network. Restarting it will allow a computer to
-access the web interface. However, the connection will drop after a short time regardless of activity. 
+access the web interface. However, the connection will drop after a short time regardless of activity. As for the computer that
+will run the program on the floor, I suggested that my old company computer be used. It was able to run the program even though
+it only contained 4 GB of RAM.
