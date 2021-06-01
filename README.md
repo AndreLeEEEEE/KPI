@@ -191,4 +191,7 @@ the modification that made looking up a specific plex page more universal, the p
 previous change is required in case the search results change in order, a way to put the MBw in front was necessary.
 
 6/1/2021: The color feature of the web interface was added back in. This means the code has to be refactored again to to utilize
-color, as opposed to relying on *'s. 
+color. This will get rid of the ? that gets sent when a line is inactive. Inactive lines will be represented in red once more
+and lines that meet quotas are painted blue. At the moment, the DCU board can be accessed wirelessly over the network, but only
+for a short period of time. There's something odd about the board being on the network. Restarting it will allow a computer to
+access the web interface. However, the connection will drop after a short time regardless of activity. 
