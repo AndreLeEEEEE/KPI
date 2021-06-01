@@ -23,8 +23,8 @@ Versions of python and installed modules:
 Requirements:
 - Plex login for Wanco
 - The correct .ini file (example found in this repository)
-- Ethernet cable connection to an active message board
 - The 'latest' DCU board
+- A computer with Google chrome, version 90.0.4430 (64 bit)
 
 Abbreviations:
 Message Board window = MBw,
