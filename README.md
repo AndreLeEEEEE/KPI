@@ -189,3 +189,6 @@ This leaves only the connectivity lost error left (at the moment). Another featu
 forward. Originally, the MB driver is initialized second as logging into that requires pyautogui instead of selenium. After
 the modification that made looking up a specific plex page more universal, the pw will be brought to the foreground. Since the
 previous change is required in case the search results change in order, a way to put the MBw in front was necessary.
+
+6/1/2021: The color feature of the web interface was added back in. This means the code has to be refactored again to to utilize
+color, as opposed to relying on *'s. 
