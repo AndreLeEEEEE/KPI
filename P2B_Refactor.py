@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys  # Allows access to non character keys
 from selenium.webdriver.common.action_chains import ActionChains
 from configparser import ConfigParser  # Needed to read in from .ini files
+from selenium.webdriver.support.ui import Select  # For use of drop downs
 
 def find_by(web_driver, attribute, value, click = 0):
     """Interacts with an element by attribute."""
@@ -31,6 +32,12 @@ def find_by(web_driver, attribute, value, click = 0):
         element.click()
     else:
         return element
+
+def select_drop(web_driver, identifier, value):
+    """Chooses an option by value in a dropdown box by id."""
+    select = Select(find_by(web_driver, "id", identifier))
+    select.select_by_value(value)
+    # Returns nothing
 
 def get_qty(web_driver, location):
     """Returns the current total dropped by one line."""
@@ -110,26 +117,34 @@ def update_board(driver, remote, config):
         toggle_inactive(index, message, p_values, temp_qty, quota)
         find_by(driver, "name", "Submit", 1)  # Submit changes, alignment already sticks
 
-    def toggle_inactive(index, page, prev_qty, cur_qty, quo):
+    def toggle_inactive(index, prev_qty, cur_qty, quo):
         """Change the text color of a line when necessary."""
         """
         index - integer, current page index
-        page - selenium element, message box
         prev_qty - list of str, the line's qty before the current one
         cur_qty - string, the line's current qty
         quo - string, the line's quota
         """
         inactivity = config.sections()[3]  # Inactivity section
         time_limit = config.items(inactivity)[index][1]  # In minutes
-        if (time_limit == "x") or (int(cur_qty) >= int(quo)):
-            # If there's no time limit or quota was achieved
+        if (int(cur_qty) >= int(quo)) and (int(quo) != 0):  # If the quota is met
+            select_drop(driver, "MS12000", "Blue")  # Mark as done
+            return  # Exit this function
+        elif (time_limit == "x"):  # If there's no time limit
             return  # Exit this function
         else:
-            if (cur_qty == prev_qty[index]) and (inactives[index] >= int(time_limit)):
-                page.send_keys("?")
+            if (cur_qty == prev_qty[index]):
+                # The reason why these two if statements aren't joined by AND is 
+                # because a line's qty can be the same, but their inactivity 
+                # timer is still low. If conjoined by AND and the latter case
+                # occurs, the else statement will execute and the inactivity
+                # timer will reset when it shouldn't.
+                if (inactives[index] >= int(time_limit)):
+                    select_drop(driver, "MS12000", "Red")  # Mark as inactive
             else:
                 inactives[index] = 0  # Reset counter
                 prev_qty[index] = cur_qty  # Update previous value
+                select_drop(driver, "MS12000", "Green")  # Mark as active
 
     def toggle_break(index, page, curr_time, line_break):
         """Signify that a line is on break."""
@@ -267,6 +282,7 @@ def setup_message(driver, remote, config):
                 message.send_keys(quota)
 
             find_by(driver, "id", "MS9001C1", 1)  # Change alignment
+            select_drop(driver, "MS12000", "Green")  # Default color is green
             find_by(driver, "name", "Submit", 1)
             # Add a new page, the interface automatically goes to it
             # Unless this is the last page, then don't add new page
@@ -313,7 +329,7 @@ def setup_board(driver):
     """
     driver - selenium webdriver, message board driver
     """
-    driver.get("http://192.168.13.100:82/")  # Open the IP address
+    driver.get("http://http://10.0.3.179/Wanco8.wgi/")  # Open the IP address
     login()
     try:  # If left on Quick Message
         find_by(driver, "id", "MS3001C1", 1)
@@ -331,9 +347,9 @@ def main(driver, remote, config):
     remote - selenium webdriver, plex driver
     config - config file, holds KPI.ini
     """
-    setup_board(driver)
-    setup_plex(remote)
-    auto.click(auto.locateOnScreen("BringForward.png"))
+    setup_board(driver)  # Leaves message board window in foreground
+    setup_plex(remote)  # Leaves plex window in foreground
+    auto.click(auto.locateOnScreen("BringForward.png"))  # Puts MBw back into foreground
 
     time.sleep(2)
     setup_message(driver, remote, config)
