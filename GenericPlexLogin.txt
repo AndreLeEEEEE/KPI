@@ -1,8 +1,0 @@
-Generic credentials for Plex:
-w.mc.tester
-test1wanco
-
-These don't have much use since as an extremely generic account, its access to stuff is really limited. It cannot
-be used for this project since it doesn't have access to Production History.
-
-These credentials work for both classic Plex and modern Plex.
