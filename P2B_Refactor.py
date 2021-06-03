@@ -114,7 +114,7 @@ def update_board(driver, remote, config):
         if int(quota) != 0:
             message.send_keys('/' + quota)
 
-        toggle_inactive(index, message, p_values, temp_qty, quota)
+        toggle_inactive(index, p_values, temp_qty, quota)
         find_by(driver, "name", "Submit", 1)  # Submit changes, alignment already sticks
 
     def toggle_inactive(index, prev_qty, cur_qty, quo):
@@ -197,7 +197,7 @@ def update_board(driver, remote, config):
                 exit()
             breaks[index].append((_time_.split('-')[0]).strip())  # Append a break start
             breaks[index].append((_time_.split('-')[1]).strip())  # Append a break end
-        # The list is reversed so the most recent times can be popped off the end
+        # The list is reversed so the nearest times can be popped off the end
         # without affecting the placement of the boolean marker
         breaks[index] = breaks[index][::-1]
         if len(breaks[index]) % 2 != 0:  # If there's an odd number of times
